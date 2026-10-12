@@ -2,7 +2,8 @@ schema_version: "1.0"
 slug: keti
 name: 한국전자기술연구원
 short_name: KETI
-description: SDV_AIFW 프로젝트의 담당기관입니다.
+description: SDV 공동 연구에 참여하는 기관입니다. 공개 프로젝트는 추후 등록할 예정입니다.
 website: https://www.keti.re.kr
 country: KR
-
+logo: keti.png
+logo_source: https://www.keti.re.kr/img/main/logo.png

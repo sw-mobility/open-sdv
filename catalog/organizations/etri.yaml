@@ -5,4 +5,5 @@ short_name: ETRI
 description: TANGO-SDV와 SDV_agent 프로젝트의 담당기관입니다.
 website: https://www.etri.re.kr
 country: KR
-
+logo: etri.svg
+logo_source: https://www.etri.re.kr/images/intro/logo-color.svg

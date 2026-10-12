@@ -41,6 +41,7 @@ await Promise.all([
   fs.copyFile(path.join(root, 'site/styles.css'), path.join(dist, 'styles.css')),
   fs.copyFile(path.join(root, 'site/catalog.js'), path.join(dist, 'catalog.js')),
   fs.copyFile(path.join(root, 'site/favicon.svg'), path.join(dist, 'favicon.svg')),
+  fs.cp(path.join(root, 'site/assets'), path.join(dist, 'assets'), { recursive: true }),
 ]);
 
 await Promise.all([
@@ -78,6 +79,7 @@ async function loadOrganizations() {
   for (const file of files) {
     const data = parseYaml(await fs.readFile(file, 'utf8'));
     if (!validateOrganization(data)) failValidation(file, validateOrganization.errors);
+    if (data.logo) await fs.access(path.join(root, 'site/assets/organizations', data.logo));
     if (seen.has(data.slug)) throw new Error(`Duplicate organization slug: ${data.slug}`);
     seen.add(data.slug);
     result.push(data);
@@ -197,7 +199,7 @@ function layout({ title, description, current, body }) {
 
 function renderCatalog() {
   const categories = [...new Set(projects.flatMap((p) => p.categories))].sort((a, b) => a.localeCompare(b, 'ko-KR'));
-  const layers = ['vehicle', 'edge', 'cloud', 'tooling', 'data', 'safety'];
+  const layers = ['vehicle', 'edge', 'cloud', 'tooling', 'data', 'safety'].filter((layer) => projects.some((project) => project.sdv_layers.includes(layer)));
   const cards = projects.map(renderProjectCard).join('\n');
   const body = `
     <section class="catalog-hero" aria-labelledby="catalog-title">
@@ -210,16 +212,19 @@ function renderCatalog() {
         <div class="metrics" aria-label="카탈로그 통계">
           <div class="metric"><strong>${projects.length}</strong><span>등록 프로젝트</span></div>
           <div class="metric"><strong>${organizations.length}</strong><span>참여 기관</span></div>
-          <div class="metric"><strong>${projects.filter((p) => p.repository_status === 'public').length}</strong><span>공개 저장소 확인</span></div>
         </div>
       </div>
     </section>
     <section class="shell catalog-body" aria-labelledby="project-list-title">
-      <div class="section-heading"><h2>프로젝트 찾기</h2><p>키워드, 분류 또는 SDV 계층으로 등록 프로젝트를 탐색합니다.</p></div>
+      <div class="section-heading"><h2>프로젝트 찾기</h2><p>기관과 기술 분야를 선택하거나 프로젝트 이름으로 검색하세요.</p></div>
       <div class="filter-panel" role="search">
         <div class="control">
           <label for="project-search">프로젝트 검색</label><span class="search-icon" aria-hidden="true"></span>
-          <input id="project-search" name="q" data-filter="search" type="search" placeholder="예: 차량 신호, OTA, Python…" autocomplete="off">
+          <input id="project-search" name="q" data-filter="search" type="search" placeholder="예: TANGO, Yocto, 비전" autocomplete="off">
+        </div>
+        <div class="control">
+          <label for="organization-filter">담당기관</label>
+          <select id="organization-filter" data-filter="organization"><option value="">모든 기관</option>${organizations.filter((org) => projects.some((project) => project.organization === org.slug)).map((org) => `<option value="${org.slug}">${escapeHtml(org.short_name)}</option>`).join('')}</select>
         </div>
         <div class="control">
           <label for="category-filter">분류</label>
@@ -230,7 +235,8 @@ function renderCatalog() {
           <select id="layer-filter" name="layer" data-filter="layer"><option value="">모든 계층</option>${layers.map((item) => `<option value="${item}">${item}</option>`).join('')}</select>
         </div>
       </div>
-      <div class="result-bar"><h2 id="project-list-title">등록 프로젝트</h2><span class="result-count" data-result-count aria-live="polite">${projects.length}개 프로젝트</span></div>
+      <div class="filter-summary" data-filter-summary hidden><div class="filter-chips" data-filter-chips aria-label="선택한 검색 조건"></div><button class="reset-filters" type="button" data-clear-filters>전체 초기화</button></div>
+      <div class="result-bar"><h2 id="project-list-title">공개 프로젝트</h2><span class="result-count" data-result-count aria-live="polite">${projects.length}개 프로젝트</span></div>
       <div class="project-grid">${cards}</div>
       <div class="empty-state" data-empty-state><strong>검색 결과가 없습니다.</strong><p>다른 검색어를 입력하거나 필터를 초기화해 보세요.</p><button class="button secondary" type="button" data-clear-filters>전체 프로젝트 보기</button></div>
     </section>
@@ -241,9 +247,9 @@ function renderCatalog() {
 function renderProjectCard(project) {
   const org = organizationMap.get(project.organization);
   const searchText = [project.name, project.summary, org.name, org.short_name, ...project.categories, ...(project.technologies || [])].join(' ');
-  return `<a class="project-card" href="${url(`/projects/${project.slug}/`)}" data-project-card data-search="${escapeHtml(searchText)}" data-categories="${escapeHtml(project.categories.map((v) => v.toLowerCase()).join('|'))}" data-layers="${escapeHtml(project.sdv_layers.join('|'))}" aria-label="${escapeHtml(project.name)} 상세 보기">
+  return `<a class="project-card" href="${url(`/projects/${project.slug}/`)}" data-project-card data-organization="${escapeHtml(project.organization)}" data-search="${escapeHtml(searchText)}" data-categories="${escapeHtml(project.categories.map((v) => v.toLowerCase()).join('|'))}" data-layers="${escapeHtml(project.sdv_layers.join('|'))}" aria-label="${escapeHtml(project.name)} · ${escapeHtml(org.name)} 상세 보기">
     <div class="project-card-accent" aria-hidden="true"></div><div class="project-card-body">
-    <div class="card-top"><span class="org-lockup"><span class="org-monogram">${escapeHtml(org.short_name)}</span>${escapeHtml(org.name)}</span>${project.repository_status === 'unconfirmed' ? '<span class="badge">접근 확인 중</span>' : ''}</div>
+    <div class="card-top">${renderOrganizationLogo(org, 'card')}</div>
     <h3>${escapeHtml(project.name)}</h3>
     <p class="summary">${escapeHtml(project.summary)}</p>
     <div class="tag-row">${project.categories.slice(0, 3).map((category) => `<span class="tag">${escapeHtml(category)}</span>`).join('')}</div>
@@ -255,16 +261,17 @@ function renderProjectCard(project) {
 function renderProject(project) {
   const org = organizationMap.get(project.organization);
   const externalLinks = [
-    project.homepage ? ['Website', project.homepage] : null,
-    project.repository ? ['Source repository', project.repository] : null,
-    project.documentation ? ['Documentation', project.documentation] : null,
+    project.homepage ? ['프로젝트 홈페이지', project.homepage] : null,
+    project.repository ? ['GitHub 저장소', project.repository] : null,
+    project.documentation ? ['개발 문서', project.documentation] : null,
   ].filter(Boolean);
   const links = externalLinks.map(([label, href]) => `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)} ↗</a>`).join('');
   const actions = [
-    project.repository ? `<a class="button" href="${escapeHtml(project.repository)}" target="_blank" rel="noopener noreferrer">Source code ↗</a>` : '',
-    project.documentation ? `<a class="button secondary" href="${escapeHtml(project.documentation)}" target="_blank" rel="noopener noreferrer">Documentation ↗</a>` : '',
+    project.repository ? `<a class="button" href="${escapeHtml(project.repository)}" target="_blank" rel="noopener noreferrer">소스 코드 ↗</a>` : '',
+    project.documentation ? `<a class="button secondary" href="${escapeHtml(project.documentation)}" target="_blank" rel="noopener noreferrer">개발 문서 ↗</a>` : '',
   ].filter(Boolean).join('');
   const integrationNames = project.integrates_with || [];
+  const siblingProjects = projects.filter((item) => item.organization === project.organization && item.slug !== project.slug);
   const integrationLinks = integrationNames.map((name) => {
     const match = projects.find((p) => p.name === name);
     return match ? `<li><a href="${url(`/projects/${match.slug}/`)}">${escapeHtml(name)}</a></li>` : `<li>${escapeHtml(name)}</li>`;
@@ -274,7 +281,7 @@ function renderProject(project) {
   const resourceRows = externalLinks.length ? externalLinks.map(([label, href]) => `<div class="resource-item"><strong>${escapeHtml(label)}</strong><p><a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(href)}</a></p></div>`).join('') : '<div class="resource-item"><strong>Resources</strong><p>외부 링크가 아직 등록되지 않았습니다.</p></div>';
   const body = `
     <header class="project-header">
-      <div class="shell"><div class="breadcrumbs"><a href="${url('/')}">Home</a><span>›</span><a href="${url('/')}">Projects</a><span>›</span>${escapeHtml(project.name)}</div>
+      <div class="shell"><div class="breadcrumbs"><a href="${url('/')}" data-project-list>← 프로젝트 목록</a><span>›</span>${escapeHtml(project.name)}</div>
         <div class="project-title-row">
           <div>
             <p class="project-kicker">${escapeHtml(org.name)}</p>
@@ -285,37 +292,37 @@ function renderProject(project) {
         </div>
       </div>
       <div class="project-tab-bar"><div class="shell project-tabs" role="tablist" aria-label="프로젝트 정보" data-project-tabs>
-        <button type="button" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true" data-tab="overview">Overview</button>
-        <button type="button" role="tab" id="tab-downloads" aria-controls="panel-downloads" aria-selected="false" tabindex="-1" data-tab="downloads">Downloads</button>
-        <button type="button" role="tab" id="tab-people" aria-controls="panel-people" aria-selected="false" tabindex="-1" data-tab="people">Who's Involved</button>
-        <button type="button" role="tab" id="tab-resources" aria-controls="panel-resources" aria-selected="false" tabindex="-1" data-tab="resources">Developer Resources</button>
-        <button type="button" role="tab" id="tab-governance" aria-controls="panel-governance" aria-selected="false" tabindex="-1" data-tab="governance">Governance</button>
-        <button type="button" role="tab" id="tab-contact" aria-controls="panel-contact" aria-selected="false" tabindex="-1" data-tab="contact">Contact Us</button>
+        <button type="button" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true" data-tab="overview">개요</button>
+        <button type="button" role="tab" id="tab-downloads" aria-controls="panel-downloads" aria-selected="false" tabindex="-1" data-tab="downloads">소스·문서</button>
+        <button type="button" role="tab" id="tab-people" aria-controls="panel-people" aria-selected="false" tabindex="-1" data-tab="people">참여기관</button>
+        <button type="button" role="tab" id="tab-resources" aria-controls="panel-resources" aria-selected="false" tabindex="-1" data-tab="resources">개발 자료</button>
+        <button type="button" role="tab" id="tab-governance" aria-controls="panel-governance" aria-selected="false" tabindex="-1" data-tab="governance">운영 정보</button>
+        <button type="button" role="tab" id="tab-contact" aria-controls="panel-contact" aria-selected="false" tabindex="-1" data-tab="contact">문의·기여</button>
       </div></div>
     </header>
     <div class="project-page"><div class="shell project-layout">
       <div class="project-main">
         <section class="tab-panel" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-tab-panel="overview">
-          <h2>Project overview</h2><p class="tab-intro">${escapeHtml(project.summary)}</p>
+          <h2>프로젝트 개요</h2><p class="tab-intro">${escapeHtml(project.summary)}</p>
           <dl class="overview-facts">
-            <div class="fact"><dt>State</dt><dd>${maturityLabel(project.maturity)}</dd></div>
-            <div class="fact"><dt>Status</dt><dd>${statusLabel(project.status)}</dd></div>
-            <div class="fact"><dt>License</dt><dd>${licenseLabel(project.license)}</dd></div>
-            <div class="fact"><dt>Last reviewed</dt><dd>${escapeHtml(project.last_reviewed)}</dd></div>
+            <div class="fact"><dt>담당기관</dt><dd>${escapeHtml(org.short_name)}</dd></div>
+            <div class="fact"><dt>라이선스</dt><dd>${licenseLabel(project.license)}</dd></div>
+            <div class="fact"><dt>저장소</dt><dd>GitHub · 공개</dd></div>
+            <div class="fact"><dt>정보 확인일</dt><dd>${escapeHtml(project.last_reviewed)}</dd></div>
           </dl>
           <article class="prose">${project.html}</article>
         </section>
-        <section class="tab-panel" id="panel-downloads" role="tabpanel" aria-labelledby="tab-downloads" data-tab-panel="downloads" hidden><h2>Downloads</h2><p class="tab-intro">소스 코드와 배포 자료는 프로젝트가 관리하는 공식 채널에서 제공합니다.</p><div class="resource-list">${resourceRows}</div></section>
-        <section class="tab-panel" id="panel-people" role="tabpanel" aria-labelledby="tab-people" data-tab-panel="people" hidden><h2>Who's involved</h2><p class="tab-intro">이 프로젝트를 등록하고 유지하는 기관과 담당자입니다.</p><div class="people-list">${maintainers}</div><h3>Participating organization</h3><p><strong>${escapeHtml(org.name)}</strong><br>${escapeHtml(org.description)}</p></section>
-        <section class="tab-panel" id="panel-resources" role="tabpanel" aria-labelledby="tab-resources" data-tab-panel="resources" hidden><h2>Developer resources</h2><p class="tab-intro">개발, 통합, 테스트를 시작하는 데 필요한 프로젝트 링크와 기술 정보입니다.</p><div class="resource-list">${resourceRows}</div><h3>Technologies</h3><div class="tag-row">${technologyTags}</div><h3>SDV layers</h3><div class="tag-row">${project.sdv_layers.map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join('')}</div></section>
-        <section class="tab-panel" id="panel-governance" role="tabpanel" aria-labelledby="tab-governance" data-tab-panel="governance" hidden><h2>Governance</h2><p class="tab-intro">프로젝트의 담당기관과 라이선스, 정보 확인일을 안내합니다. 구체적인 운영 및 기여 정책은 공식 저장소를 확인하세요.</p><dl class="overview-facts"><div class="fact"><dt>Maturity</dt><dd>${maturityLabel(project.maturity)}</dd></div><div class="fact"><dt>License</dt><dd>${licenseLabel(project.license)}</dd></div><div class="fact"><dt>담당기관</dt><dd>${escapeHtml(org.name)}</dd></div><div class="fact"><dt>정보 확인일</dt><dd>${escapeHtml(project.last_reviewed)}</dd></div></dl><p>성숙도와 담당자 등 미등록 정보는 각 기관에서 보완할 예정입니다.</p></section>
-        <section class="tab-panel" id="panel-contact" role="tabpanel" aria-labelledby="tab-contact" data-tab-panel="contact" hidden><h2>Contact us</h2><p class="tab-intro">질문과 기여 제안은 공식 저장소 또는 아래 프로젝트 담당자에게 전달할 수 있습니다.</p><div class="people-list">${maintainers}</div>${org.website ? `<p><a class="button secondary" href="${escapeHtml(org.website)}" target="_blank" rel="noopener noreferrer">기관 페이지 방문 ↗</a></p>` : ''}</section>
+        <section class="tab-panel" id="panel-downloads" role="tabpanel" aria-labelledby="tab-downloads" data-tab-panel="downloads" hidden><h2>소스 코드와 문서</h2><p class="tab-intro">소스 코드와 배포 자료는 프로젝트가 관리하는 공식 채널에서 제공합니다.</p><div class="resource-list">${resourceRows}</div></section>
+        <section class="tab-panel" id="panel-people" role="tabpanel" aria-labelledby="tab-people" data-tab-panel="people" hidden><h2>Who's involved</h2><p class="tab-intro">이 프로젝트를 등록하고 유지하는 기관과 담당자입니다.</p><div class="people-list">${maintainers}</div><h3>담당기관</h3><p><strong>${escapeHtml(org.name)}</strong><br>${escapeHtml(org.description)}</p></section>
+        <section class="tab-panel" id="panel-resources" role="tabpanel" aria-labelledby="tab-resources" data-tab-panel="resources" hidden><h2>개발 자료</h2><p class="tab-intro">개발, 통합, 테스트를 시작하는 데 필요한 프로젝트 링크와 기술 정보입니다.</p><div class="resource-list">${resourceRows}</div><h3>사용 기술</h3><div class="tag-row">${technologyTags}</div><h3>SDV 적용 계층</h3><div class="tag-row">${project.sdv_layers.map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join('')}</div></section>
+        <section class="tab-panel" id="panel-governance" role="tabpanel" aria-labelledby="tab-governance" data-tab-panel="governance" hidden><h2>운영 정보</h2><p class="tab-intro">프로젝트의 담당기관과 라이선스, 정보 확인일을 안내합니다. 구체적인 운영 및 기여 정책은 공식 저장소를 확인하세요.</p><dl class="overview-facts"><div class="fact"><dt>Maturity</dt><dd>${maturityLabel(project.maturity)}</dd></div><div class="fact"><dt>License</dt><dd>${licenseLabel(project.license)}</dd></div><div class="fact"><dt>담당기관</dt><dd>${escapeHtml(org.name)}</dd></div><div class="fact"><dt>정보 확인일</dt><dd>${escapeHtml(project.last_reviewed)}</dd></div></dl><p>성숙도와 담당자 등 미등록 정보는 각 기관에서 보완할 예정입니다.</p></section>
+        <section class="tab-panel" id="panel-contact" role="tabpanel" aria-labelledby="tab-contact" data-tab-panel="contact" hidden><h2>문의 및 기여</h2><p class="tab-intro">프로젝트 문의와 개선 제안은 공식 저장소의 안내를 확인한 뒤 전달하세요.</p><div class="sidebar-links"><a href="${escapeHtml(project.repository)}/issues" target="_blank" rel="noopener noreferrer">GitHub Issues에서 문의·제안 ↗</a><a href="${escapeHtml(project.repository)}#readme" target="_blank" rel="noopener noreferrer">README에서 기여 방법 확인 ↗</a></div>${project.maintainers.length ? `<h3>프로젝트 담당자</h3><div class="people-list">${maintainers}</div>` : ''}</section>
       </div>
       <aside class="project-sidebar" aria-label="프로젝트 보조 정보">
-        <section class="sidebar-card"><h2>Project links</h2><div class="sidebar-links">${links || '<span>등록된 외부 링크 없음</span>'}</div></section>
-        <section class="sidebar-card organization-panel"><div class="organization-emblem" aria-hidden="true">${escapeHtml(org.short_name)}</div><strong>${escapeHtml(org.name)}</strong><span>${escapeHtml(org.country || '')} · Project organization</span></section>
-        <section class="sidebar-card"><h2>Related projects</h2><ul class="related-list">${integrationLinks}</ul></section>
-        <section class="sidebar-card"><h2>Project tags</h2><div class="tag-row">${project.categories.map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join('')}${technologyTags}</div></section>
+        <section class="sidebar-card"><h2>프로젝트 링크</h2><div class="sidebar-links">${links || '<span>등록된 외부 링크 없음</span>'}</div></section>
+        <section class="sidebar-card organization-panel">${renderOrganizationLogo(org, 'detail')}<span>프로젝트 담당기관</span></section>
+        ${integrationNames.length ? `<section class="sidebar-card"><h2>연관 프로젝트</h2><ul class="related-list">${integrationLinks}</ul></section>` : siblingProjects.length ? `<section class="sidebar-card"><h2>같은 기관의 프로젝트</h2><ul class="related-list">${siblingProjects.map((item) => `<li><a href="${url(`/projects/${item.slug}/`)}">${escapeHtml(item.name)}</a></li>`).join('')}</ul></section>` : ''}
+        <section class="sidebar-card"><h2>기술 분류</h2><div class="tag-row">${project.categories.map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join('')}${technologyTags}</div></section>
       </aside>
     </div></div>
     <script src="${url('/catalog.js')}" defer></script>`;
@@ -325,12 +332,13 @@ function renderProject(project) {
 function renderOrganizations() {
   const cards = organizations.map((org) => {
     const count = projects.filter((project) => project.organization === org.slug).length;
-    const link = org.website || org.github;
+    const institutionProjects = projects.filter((project) => project.organization === org.slug);
     return `<article class="org-card">
-      <div class="org-monogram">${escapeHtml(org.short_name)}</div>
+      <div class="institution-logo">${renderOrganizationLogo(org, 'institution')}</div>
       <h2>${escapeHtml(org.name)}</h2>
       <p>${escapeHtml(org.description)}</p>
-      <div class="org-meta"><span>${count}개 프로젝트</span>${link ? `<a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">기관 홈페이지 ↗</a>` : ''}</div>
+      ${count ? `<ul class="institution-projects">${institutionProjects.map((project) => `<li><a href="${url(`/projects/${project.slug}/`)}">${escapeHtml(project.name)} <span aria-hidden="true">→</span></a></li>`).join('')}</ul>` : ''}
+      <div class="org-meta"><span>${count ? `${count}개 공개 프로젝트` : '공개 프로젝트 준비 중'}</span>${count ? `<a href="${url('/')}?organization=${org.slug}">프로젝트 모아보기 →</a>` : ''}</div>
     </article>`;
   }).join('');
   const body = `<section class="page-hero"><div class="shell"><p class="eyebrow">Organizations</p><h1>참여 기관</h1><p class="lead">각 기관이 담당하는 SDV 프로젝트와 공개 저장소를 살펴보세요.</p></div></section><div class="shell org-grid">${cards}</div>`;
@@ -382,4 +390,8 @@ function maturityLabel(maturity) {
 
 function licenseLabel(license) {
   return license === 'NOASSERTION' ? '라이선스 확인 필요' : escapeHtml(license);
+}
+
+function renderOrganizationLogo(org, variant) {
+  return org.logo ? `<img class="org-logo org-logo--${variant}" src="${url(`/assets/organizations/${org.logo}`)}" alt="${escapeHtml(org.name)}" width="200" height="64" loading="lazy">` : `<span class="org-monogram">${escapeHtml(org.short_name)}</span>`;
 }

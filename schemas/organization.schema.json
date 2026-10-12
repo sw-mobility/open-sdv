@@ -12,6 +12,8 @@
     "short_name": { "type": "string", "minLength": 2, "maxLength": 16 },
     "description": { "type": "string", "minLength": 20, "maxLength": 240 },
     "website": { "type": "string", "format": "uri" },
+    "logo": { "type": "string", "pattern": "^[a-z0-9-]+\\.(png|svg|webp)$" },
+    "logo_source": { "type": "string", "format": "uri" },
     "github": { "type": "string", "format": "uri" },
     "country": { "type": "string", "minLength": 2 },
     "demo": { "type": "boolean" }
