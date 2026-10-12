@@ -1,0 +1,24 @@
+schema_version: "1.0"
+slug: drivesim-kit
+name: DriveSim Kit
+organization: openroad-lab
+summary: 실제 차량 없이 센서 입력과 차량 신호, 장애 상황을 재현해 SDV 서비스의 통합 동작을 검증하는 시뮬레이션 키트입니다.
+status: maintained
+maturity: production
+license: BSD-3-Clause
+categories:
+  - 시뮬레이션
+  - 테스트
+sdv_layers:
+  - tooling
+  - data
+integrates_with:
+  - Vehicle Signal Bridge
+technologies:
+  - Python
+  - ROS 2
+maintainers:
+  - name: OpenRoad Simulation Team
+    role: Maintainer
+last_reviewed: "2026-09-12"
+demo: true

@@ -1,0 +1,27 @@
+schema_version: "1.0"
+slug: ota-harbor
+name: OTA Harbor
+organization: openroad-lab
+summary: 차량 소프트웨어 릴리스의 서명, 단계적 배포, 실패 감지와 롤백 정책을 재현 가능한 파이프라인으로 구성하는 예시 도구입니다.
+status: experimental
+maturity: sandbox
+license: Apache-2.0
+categories:
+  - DevSecOps
+  - OTA
+sdv_layers:
+  - cloud
+  - tooling
+  - safety
+integrates_with:
+  - EdgeFleet Runtime
+technologies:
+  - Go
+  - Sigstore
+  - OCI
+maintainers:
+  - name: OpenRoad Delivery Team
+    role: Maintainer
+last_reviewed: "2026-09-20"
+featured: true
+demo: true

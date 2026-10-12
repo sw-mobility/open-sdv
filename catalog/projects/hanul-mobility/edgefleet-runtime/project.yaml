@@ -1,0 +1,25 @@
+schema_version: "1.0"
+slug: edgefleet-runtime
+name: EdgeFleet Runtime
+organization: hanul-mobility
+summary: 차량 내 여러 컴퓨팅 노드의 컨테이너 워크로드를 선언적으로 배치하고 상태를 동기화하는 경량 런타임입니다.
+status: experimental
+maturity: sandbox
+license: Apache-2.0
+categories:
+  - 런타임
+  - 오케스트레이션
+sdv_layers:
+  - vehicle
+  - edge
+integrates_with:
+  - Vehicle Signal Bridge
+technologies:
+  - Rust
+  - OCI
+maintainers:
+  - name: Hanul Runtime Team
+    role: Maintainer
+last_reviewed: "2026-09-18"
+featured: true
+demo: true

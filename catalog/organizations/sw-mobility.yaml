@@ -1,0 +1,9 @@
+schema_version: "1.0"
+slug: sw-mobility
+name: SW Mobility Open Collaboration
+short_name: SWM
+description: HW-aware SDV 기술과 차량 소프트웨어를 공개 협업하는 오픈소스 조직입니다.
+website: https://github.com/sw-mobility
+github: https://github.com/sw-mobility
+country: KR
+demo: false

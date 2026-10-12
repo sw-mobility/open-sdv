@@ -1,0 +1,31 @@
+schema_version: "1.0"
+slug: tango-sdv
+name: TANGO SDV
+organization: sw-mobility
+summary: 대상 하드웨어에 맞춰 AI 모델을 생성·최적화하고 차량과 엣지 환경에 배포하는 통합 머신러닝 프레임워크입니다.
+repository: https://github.com/sw-mobility/TANGO-SDV
+documentation: https://github.com/sw-mobility/TANGO-SDV/tree/main/docs
+status: active
+maturity: incubation
+license: Apache-2.0
+categories:
+  - AI / ML
+  - 개발 도구
+sdv_layers:
+  - vehicle
+  - edge
+  - cloud
+integrates_with:
+  - Docker
+  - Kubernetes
+technologies:
+  - Python
+  - PyTorch
+  - Docker
+maintainers:
+  - name: SW Mobility
+    github: sw-mobility
+    role: Project owner
+last_reviewed: "2026-09-28"
+featured: true
+demo: false
