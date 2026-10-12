@@ -236,7 +236,7 @@ function renderCatalog() {
         </div>
       </div>
       <div class="filter-summary" data-filter-summary hidden><div class="filter-chips" data-filter-chips aria-label="선택한 검색 조건"></div><button class="reset-filters" type="button" data-clear-filters>전체 초기화</button></div>
-      <div class="result-bar"><h2 id="project-list-title">공개 프로젝트</h2><span class="result-count" data-result-count aria-live="polite">${projects.length}개 프로젝트</span></div>
+      <div class="result-bar"><h2 id="project-list-title">프로젝트</h2><span class="result-count" data-result-count aria-live="polite">${projects.length}개 프로젝트</span></div>
       <div class="project-grid">${cards}</div>
       <div class="empty-state" data-empty-state><strong>검색 결과가 없습니다.</strong><p>다른 검색어를 입력하거나 필터를 초기화해 보세요.</p><button class="button secondary" type="button" data-clear-filters>전체 프로젝트 보기</button></div>
     </section>
@@ -249,9 +249,9 @@ function renderProjectCard(project) {
   const searchText = [project.name, project.summary, org.name, org.short_name, ...project.categories, ...(project.technologies || [])].join(' ');
   return `<a class="project-card" href="${url(`/projects/${project.slug}/`)}" data-project-card data-organization="${escapeHtml(project.organization)}" data-search="${escapeHtml(searchText)}" data-categories="${escapeHtml(project.categories.map((v) => v.toLowerCase()).join('|'))}" data-layers="${escapeHtml(project.sdv_layers.join('|'))}" aria-label="${escapeHtml(project.name)} · ${escapeHtml(org.name)} 상세 보기">
     <div class="project-card-accent" aria-hidden="true"></div><div class="project-card-body">
-    <div class="card-top">${renderOrganizationLogo(org, 'card')}</div>
+    <div class="card-top">${renderOrganizationLogo(org, 'card')}${project.repository_status === 'private' ? '<span class="badge">비공개</span>' : ''}</div>
     <h3>${escapeHtml(project.name)}</h3>
-    <p class="summary">${escapeHtml(project.summary)}</p>
+    <p class="summary">${escapeHtml(project.summary) || '프로젝트 정보 준비 중'}</p>
     <div class="tag-row">${project.categories.slice(0, 3).map((category) => `<span class="tag">${escapeHtml(category)}</span>`).join('')}</div>
     <div class="card-footer"><span>${licenseLabel(project.license)}</span><span class="card-link">프로젝트 보기 →</span></div>
     </div>
@@ -267,7 +267,7 @@ function renderProject(project) {
   ].filter(Boolean);
   const links = externalLinks.map(([label, href]) => `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)} ↗</a>`).join('');
   const actions = [
-    project.repository ? `<a class="button" href="${escapeHtml(project.repository)}" target="_blank" rel="noopener noreferrer">소스 코드 ↗</a>` : '',
+    project.repository ? `<a class="button" href="${escapeHtml(project.repository)}" target="_blank" rel="noopener noreferrer">${project.repository_status === 'private' ? '저장소 링크' : '소스 코드'} ↗</a>` : '',
     project.documentation ? `<a class="button secondary" href="${escapeHtml(project.documentation)}" target="_blank" rel="noopener noreferrer">개발 문서 ↗</a>` : '',
   ].filter(Boolean).join('');
   const integrationNames = project.integrates_with || [];
@@ -286,7 +286,7 @@ function renderProject(project) {
           <div>
             <p class="project-kicker">${escapeHtml(org.name)}</p>
             <h1>${escapeHtml(project.name)}</h1>
-            <p class="detail-summary">${escapeHtml(project.summary)}</p>
+            <p class="detail-summary">${escapeHtml(project.summary) || '프로젝트 정보 준비 중'}</p>
           </div>
           ${actions ? `<div class="project-actions">${actions}</div>` : ''}
         </div>
@@ -303,14 +303,14 @@ function renderProject(project) {
     <div class="project-page"><div class="shell project-layout">
       <div class="project-main">
         <section class="tab-panel" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-tab-panel="overview">
-          <h2>프로젝트 개요</h2><p class="tab-intro">${escapeHtml(project.summary)}</p>
+          <h2>프로젝트 개요</h2>${project.summary ? `<p class="tab-intro">${escapeHtml(project.summary)}</p>` : ''}
           <dl class="overview-facts">
             <div class="fact"><dt>담당기관</dt><dd>${escapeHtml(org.short_name)}</dd></div>
             <div class="fact"><dt>라이선스</dt><dd>${licenseLabel(project.license)}</dd></div>
-            <div class="fact"><dt>저장소</dt><dd>GitHub · 공개</dd></div>
+            <div class="fact"><dt>저장소</dt><dd>${project.repository_status === 'private' ? '비공개 · 접근 권한 필요' : 'GitHub · 공개'}</dd></div>
             <div class="fact"><dt>정보 확인일</dt><dd>${escapeHtml(project.last_reviewed)}</dd></div>
           </dl>
-          <article class="prose">${project.html}</article>
+          <article class="prose">${project.html.trim() || '<p>프로젝트 소개와 사용법은 담당기관에서 등록할 예정입니다.</p>'}</article>
         </section>
         <section class="tab-panel" id="panel-downloads" role="tabpanel" aria-labelledby="tab-downloads" data-tab-panel="downloads" hidden><h2>소스 코드와 문서</h2><p class="tab-intro">소스 코드와 배포 자료는 프로젝트가 관리하는 공식 채널에서 제공합니다.</p><div class="resource-list">${resourceRows}</div></section>
         <section class="tab-panel" id="panel-people" role="tabpanel" aria-labelledby="tab-people" data-tab-panel="people" hidden><h2>Who's involved</h2><p class="tab-intro">이 프로젝트를 등록하고 유지하는 기관과 담당자입니다.</p><div class="people-list">${maintainers}</div><h3>담당기관</h3><p><strong>${escapeHtml(org.name)}</strong><br>${escapeHtml(org.description)}</p></section>
@@ -338,7 +338,7 @@ function renderOrganizations() {
       <h2>${escapeHtml(org.name)}</h2>
       <p>${escapeHtml(org.description)}</p>
       ${count ? `<ul class="institution-projects">${institutionProjects.map((project) => `<li><a href="${url(`/projects/${project.slug}/`)}">${escapeHtml(project.name)} <span aria-hidden="true">→</span></a></li>`).join('')}</ul>` : ''}
-      <div class="org-meta"><span>${count ? `${count}개 공개 프로젝트` : '공개 프로젝트 준비 중'}</span>${count ? `<a href="${url('/')}?organization=${org.slug}">프로젝트 모아보기 →</a>` : ''}</div>
+      <div class="org-meta"><span>${count ? `${count}개 등록 프로젝트` : '공개 프로젝트 준비 중'}</span>${count ? `<a href="${url('/')}?organization=${org.slug}">프로젝트 모아보기 →</a>` : ''}</div>
     </article>`;
   }).join('');
   const body = `<section class="page-hero"><div class="shell"><p class="eyebrow">Organizations</p><h1>참여 기관</h1><p class="lead">각 기관이 담당하는 SDV 프로젝트와 공개 저장소를 살펴보세요.</p></div></section><div class="shell org-grid">${cards}</div>`;
@@ -389,7 +389,7 @@ function maturityLabel(maturity) {
 }
 
 function licenseLabel(license) {
-  return license === 'NOASSERTION' ? '라이선스 확인 필요' : escapeHtml(license);
+  return !license ? '라이선스 미등록' : license === 'NOASSERTION' ? '라이선스 확인 필요' : escapeHtml(license);
 }
 
 function renderOrganizationLogo(org, variant) {

@@ -1,0 +1,15 @@
+schema_version: "1.0"
+slug: sdv-aifw
+name: SDV_AIFW
+organization: keti
+summary: ""
+repository: https://github.com/sw-mobility/SDV_AIFW
+repository_status: private
+status: unknown
+maturity: unknown
+license: ""
+categories: []
+sdv_layers: []
+technologies: []
+maintainers: []
+last_reviewed: "2026-10-12"

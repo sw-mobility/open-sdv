@@ -13,7 +13,7 @@ In the first year, each organization will independently manage its tasks and sou
 | Organization | Repositories |
 | --- | --- |
 | HL Mando | [OMP_Xrite](https://github.com/sw-mobility/OMP_Xrite), [OMP_PHM](https://github.com/sw-mobility/OMP_PHM) |
-| Korea Electronics Technology Institute | 공개 프로젝트 준비 중 |
+| Korea Electronics Technology Institute | [SDV_AIFW](https://github.com/sw-mobility/SDV_AIFW) · 비공개 저장소 |
 | Electronics and Telecommunication Research Institute | [TANGO-SDV](https://github.com/sw-mobility/TANGO-SDV), [SDV_agent](https://github.com/sw-mobility/SDV_agent) |
 | Gachon University | [Edge_Vision](https://github.com/sw-mobility/Edge_Vision) |
 | Perseus Inc | Repository URL to be added |
@@ -22,7 +22,7 @@ In the first year, each organization will independently manage its tasks and sou
 
 ## SDV 공개 소프트웨어 카탈로그
 
-기관별 프로젝트 메타데이터를 검증하고 목록·상세 페이지를 생성하는 정적 웹사이트입니다. 만도, ETRI, 가천대학교의 6개 공개 프로젝트를 등록했으며 KETI의 공개 프로젝트는 추후 추가합니다. 미확인 상태와 성숙도, 라이선스는 추정하지 않고 담당기관 확인 대상으로 표시합니다.
+기관별 프로젝트 메타데이터를 검증하고 목록·상세 페이지를 생성하는 정적 웹사이트입니다. 6개 공개 프로젝트와 KETI의 SDV_AIFW 등록 틀을 제공합니다. SDV_AIFW 저장소는 비공개이며 소개·사용법은 담당기관이 작성할 수 있도록 비워두었습니다.
 
 ## 로컬 실행
 
