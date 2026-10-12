@@ -168,7 +168,7 @@ function layout({ title, description, current, body }) {
   <meta name="description" content="${escapeHtml(description)}">
   <meta name="theme-color" content="#07345f">
   <title>${escapeHtml(fullTitle)}</title>
-  <link rel="icon" type="image/svg+xml" href="${url('/favicon.svg')}">
+  <link rel="icon" type="image/svg+xml" href="${url('/favicon.svg')}?v=2">
   <link rel="stylesheet" href="${url('/styles.css')}">
 </head>
 <body>
@@ -178,7 +178,7 @@ function layout({ title, description, current, body }) {
   </div>
   <header class="site-header">
     <nav class="nav" aria-label="주요 메뉴">
-      <a class="brand" href="${url('/')}"><span class="brand-mark" aria-hidden="true">SDV</span><span class="brand-copy"><strong>Open SDV Project DB</strong><small>Collaborative registry</small></span></a>
+      <a class="brand" href="${url('/')}" aria-label="Open SDV 프로젝트 목록"><img class="brand-mark" src="${url('/assets/open-sdv-mark.svg')}" alt="" width="48" height="48"><span class="brand-copy"><strong>Open <span>SDV</span></strong><small>Project Catalog</small></span></a>
       <div class="nav-links">
         <a href="${url('/')}" ${current === 'projects' ? 'aria-current="page"' : ''}>프로젝트</a>
         <a href="${url('/organizations/')}" ${current === 'organizations' ? 'aria-current="page"' : ''}>참여 기관</a>

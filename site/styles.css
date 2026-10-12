@@ -49,9 +49,10 @@ p { margin-top: 0; }
 .site-header { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.96); border-bottom: 1px solid var(--line); backdrop-filter: blur(12px); }
 .nav { width: min(1180px, calc(100% - 48px)); min-height: 76px; margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
 .brand { display: inline-flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none; }
-.brand-mark { width: 45px; height: 45px; display: grid; place-items: center; color: #fff; background: var(--blue-700); font-weight: 800; letter-spacing: -.04em; }
+.brand-mark { flex-shrink: 0; width: 48px; height: 48px; display: block; object-fit: contain; }
 .brand-copy { display: grid; line-height: 1.12; }
-.brand-copy strong { font-size: 16px; letter-spacing: -.02em; }
+.brand-copy strong { color: var(--blue-900); font-size: 25px; font-weight: 800; letter-spacing: -.04em; }
+.brand-copy strong span { color: var(--blue-700); }
 .brand-copy small { margin-top: 4px; color: var(--muted); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
 .nav-links { display: flex; align-items: stretch; align-self: stretch; gap: 30px; }
 .nav-links a { position: relative; display: grid; place-items: center; color: #303b46; font-size: 14px; font-weight: 700; text-decoration: none; }
@@ -220,7 +221,8 @@ p { margin-top: 0; }
   .notice-inner > a { font-size: 12px; }
   .notice-inner span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
   .nav { min-height: 0; padding-top: 12px; flex-direction: column; align-items: stretch; gap: 4px; }
-  .brand-mark { width: 39px; height: 39px; }
+  .brand-mark { width: 42px; height: 42px; }
+  .brand-copy strong { font-size: 23px; }
   .brand-copy small { display: none; }
   .nav-links { align-self: auto; justify-content: space-between; gap: 14px; }
   .nav-links a { min-height: 44px; font-size: 13px; }
