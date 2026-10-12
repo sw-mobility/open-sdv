@@ -22,7 +22,7 @@ In the first year, each organization will independently manage its tasks and sou
 
 ## SDV 공개 소프트웨어 카탈로그
 
-기관별 프로젝트 메타데이터를 검증하고 목록·상세 페이지를 생성하는 정적 웹사이트 MVP입니다. 현재 일부 항목은 `demo: true`로 표시된 예시 데이터입니다.
+기관별 프로젝트 메타데이터를 검증하고 목록·상세 페이지를 생성하는 정적 웹사이트입니다. 만도, KETI, ETRI, 가천대학교의 7개 프로젝트를 등록했습니다. 미확인 상태와 성숙도, 라이선스는 추정하지 않고 담당기관 확인 대상으로 표시합니다.
 
 ## 로컬 실행
 

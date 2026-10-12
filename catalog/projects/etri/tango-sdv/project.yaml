@@ -1,0 +1,24 @@
+schema_version: "1.0"
+slug: tango-sdv
+name: TANGO-SDV
+organization: etri
+summary: 데이터 준비부터 신경망 모델 생성·학습·대상 장치 최적화와 배포까지 지원하는 통합 머신러닝 프레임워크입니다.
+repository: https://github.com/sw-mobility/TANGO-SDV
+repository_status: public
+documentation: https://github.com/sw-mobility/TANGO-SDV/tree/main/docs
+status: unknown
+maturity: unknown
+license: NOASSERTION
+categories:
+  - AI / ML
+  - 개발 도구
+sdv_layers:
+  - edge
+  - tooling
+technologies:
+  - Python
+  - Docker
+  - AutoML
+maintainers: []
+last_reviewed: "2026-10-12"
+

@@ -1,0 +1,8 @@
+schema_version: "1.0"
+slug: etri
+name: 한국전자통신연구원
+short_name: ETRI
+description: TANGO-SDV와 SDV_agent 프로젝트의 담당기관입니다.
+website: https://www.etri.re.kr
+country: KR
+

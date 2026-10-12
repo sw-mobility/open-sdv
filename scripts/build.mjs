@@ -198,7 +198,6 @@ function layout({ title, description, current, body }) {
 function renderCatalog() {
   const categories = [...new Set(projects.flatMap((p) => p.categories))].sort((a, b) => a.localeCompare(b, 'ko-KR'));
   const layers = ['vehicle', 'edge', 'cloud', 'tooling', 'data', 'safety'];
-  const active = projects.filter((p) => p.status === 'active' || p.status === 'maintained').length;
   const cards = projects.map(renderProjectCard).join('\n');
   const body = `
     <section class="catalog-hero" aria-labelledby="catalog-title">
@@ -206,13 +205,12 @@ function renderCatalog() {
         <div>
           <p class="eyebrow">Open software · shared mobility</p>
           <h1 id="catalog-title">SDV 오픈소스를<br>한곳에서 탐색하세요.</h1>
-          <p class="lead">기관별 공개 프로젝트의 목적, 사용법, 성숙도와 협업 정보를 공통 형식으로 연결하는 공동 프로젝트 데이터베이스입니다.</p>
-          <p class="demo-note">현재 일부 항목은 화면과 등록 흐름 검증을 위한 DUMMY 데이터입니다.</p>
+          <p class="lead">여러 기관이 공개한 차량 소프트웨어의 역할과 소스 코드, 개발 문서, 참여 방법을 살펴보세요.</p>
         </div>
         <div class="metrics" aria-label="카탈로그 통계">
-          <div class="metric"><strong>${projects.length}</strong><span>Projects</span></div>
-          <div class="metric"><strong>${organizations.length}</strong><span>Organizations</span></div>
-          <div class="metric"><strong>${active}</strong><span>Active</span></div>
+          <div class="metric"><strong>${projects.length}</strong><span>등록 프로젝트</span></div>
+          <div class="metric"><strong>${organizations.length}</strong><span>참여 기관</span></div>
+          <div class="metric"><strong>${projects.filter((p) => p.repository_status === 'public').length}</strong><span>공개 저장소 확인</span></div>
         </div>
       </div>
     </section>
@@ -242,14 +240,14 @@ function renderCatalog() {
 
 function renderProjectCard(project) {
   const org = organizationMap.get(project.organization);
-  const searchText = [project.name, project.summary, org.name, ...project.categories, ...(project.technologies || [])].join(' ');
+  const searchText = [project.name, project.summary, org.name, org.short_name, ...project.categories, ...(project.technologies || [])].join(' ');
   return `<a class="project-card" href="${url(`/projects/${project.slug}/`)}" data-project-card data-search="${escapeHtml(searchText)}" data-categories="${escapeHtml(project.categories.map((v) => v.toLowerCase()).join('|'))}" data-layers="${escapeHtml(project.sdv_layers.join('|'))}" aria-label="${escapeHtml(project.name)} 상세 보기">
     <div class="project-card-accent" aria-hidden="true"></div><div class="project-card-body">
-    <div class="card-top"><span class="org-lockup"><span class="org-monogram">${escapeHtml(org.short_name)}</span>${escapeHtml(org.name)}</span><span class="status-label ${project.status}">${statusLabel(project.status)}</span></div>
+    <div class="card-top"><span class="org-lockup"><span class="org-monogram">${escapeHtml(org.short_name)}</span>${escapeHtml(org.name)}</span>${project.repository_status === 'unconfirmed' ? '<span class="badge">접근 확인 중</span>' : ''}</div>
     <h3>${escapeHtml(project.name)}</h3>
     <p class="summary">${escapeHtml(project.summary)}</p>
-    <div class="tag-row">${project.sdv_layers.slice(0, 3).map((layer) => `<span class="tag">${escapeHtml(layer)}</span>`).join('')}${project.demo ? '<span class="badge demo">DUMMY</span>' : ''}</div>
-    <div class="card-footer"><span>${escapeHtml(project.license)} · ${maturityLabel(project.maturity)}</span><span class="card-link">프로젝트 보기 →</span></div>
+    <div class="tag-row">${project.categories.slice(0, 3).map((category) => `<span class="tag">${escapeHtml(category)}</span>`).join('')}</div>
+    <div class="card-footer"><span>${licenseLabel(project.license)}</span><span class="card-link">프로젝트 보기 →</span></div>
     </div>
   </a>`;
 }
@@ -272,14 +270,14 @@ function renderProject(project) {
     return match ? `<li><a href="${url(`/projects/${match.slug}/`)}">${escapeHtml(name)}</a></li>` : `<li>${escapeHtml(name)}</li>`;
   }).join('') || '<li>등록된 연동 프로젝트 없음</li>';
   const technologyTags = (project.technologies || []).map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join('') || '<span class="tag">정보 없음</span>';
-  const maintainers = project.maintainers.map((maintainer) => `<div class="person"><strong>${escapeHtml(maintainer.name)}</strong><p>${escapeHtml(maintainer.role)}${maintainer.github ? ` · <a href="https://github.com/${escapeHtml(maintainer.github)}" target="_blank" rel="noopener noreferrer">GitHub ↗</a>` : ''}</p></div>`).join('');
+  const maintainers = project.maintainers.map((maintainer) => `<div class="person"><strong>${escapeHtml(maintainer.name)}</strong><p>${escapeHtml(maintainer.role)}${maintainer.github ? ` · <a href="https://github.com/${escapeHtml(maintainer.github)}" target="_blank" rel="noopener noreferrer">GitHub ↗</a>` : ''}</p></div>`).join('') || '<div class="person"><strong>프로젝트 담당자</strong><p>담당기관에서 담당 팀과 공개 연락 경로를 등록할 예정입니다.</p></div>';
   const resourceRows = externalLinks.length ? externalLinks.map(([label, href]) => `<div class="resource-item"><strong>${escapeHtml(label)}</strong><p><a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(href)}</a></p></div>`).join('') : '<div class="resource-item"><strong>Resources</strong><p>외부 링크가 아직 등록되지 않았습니다.</p></div>';
   const body = `
     <header class="project-header">
       <div class="shell"><div class="breadcrumbs"><a href="${url('/')}">Home</a><span>›</span><a href="${url('/')}">Projects</a><span>›</span>${escapeHtml(project.name)}</div>
         <div class="project-title-row">
           <div>
-            <p class="project-kicker">${escapeHtml(org.name)}${project.demo ? ' · DUMMY DATA' : ''}</p>
+            <p class="project-kicker">${escapeHtml(org.name)}</p>
             <h1>${escapeHtml(project.name)}</h1>
             <p class="detail-summary">${escapeHtml(project.summary)}</p>
           </div>
@@ -296,13 +294,13 @@ function renderProject(project) {
       </div></div>
     </header>
     <div class="project-page"><div class="shell project-layout">
-      <main class="project-main">
+      <div class="project-main">
         <section class="tab-panel" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-tab-panel="overview">
           <h2>Project overview</h2><p class="tab-intro">${escapeHtml(project.summary)}</p>
           <dl class="overview-facts">
             <div class="fact"><dt>State</dt><dd>${maturityLabel(project.maturity)}</dd></div>
             <div class="fact"><dt>Status</dt><dd>${statusLabel(project.status)}</dd></div>
-            <div class="fact"><dt>License</dt><dd>${escapeHtml(project.license)}</dd></div>
+            <div class="fact"><dt>License</dt><dd>${licenseLabel(project.license)}</dd></div>
             <div class="fact"><dt>Last reviewed</dt><dd>${escapeHtml(project.last_reviewed)}</dd></div>
           </dl>
           <article class="prose">${project.html}</article>
@@ -310,9 +308,9 @@ function renderProject(project) {
         <section class="tab-panel" id="panel-downloads" role="tabpanel" aria-labelledby="tab-downloads" data-tab-panel="downloads" hidden><h2>Downloads</h2><p class="tab-intro">소스 코드와 배포 자료는 프로젝트가 관리하는 공식 채널에서 제공합니다.</p><div class="resource-list">${resourceRows}</div></section>
         <section class="tab-panel" id="panel-people" role="tabpanel" aria-labelledby="tab-people" data-tab-panel="people" hidden><h2>Who's involved</h2><p class="tab-intro">이 프로젝트를 등록하고 유지하는 기관과 담당자입니다.</p><div class="people-list">${maintainers}</div><h3>Participating organization</h3><p><strong>${escapeHtml(org.name)}</strong><br>${escapeHtml(org.description)}</p></section>
         <section class="tab-panel" id="panel-resources" role="tabpanel" aria-labelledby="tab-resources" data-tab-panel="resources" hidden><h2>Developer resources</h2><p class="tab-intro">개발, 통합, 테스트를 시작하는 데 필요한 프로젝트 링크와 기술 정보입니다.</p><div class="resource-list">${resourceRows}</div><h3>Technologies</h3><div class="tag-row">${technologyTags}</div><h3>SDV layers</h3><div class="tag-row">${project.sdv_layers.map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join('')}</div></section>
-        <section class="tab-panel" id="panel-governance" role="tabpanel" aria-labelledby="tab-governance" data-tab-panel="governance" hidden><h2>Governance</h2><p class="tab-intro">등록 기관이 프로젝트 정보와 문서를 직접 관리하며, 변경은 공개 검토 절차를 거칩니다.</p><dl class="overview-facts"><div class="fact"><dt>Maturity</dt><dd>${maturityLabel(project.maturity)}</dd></div><div class="fact"><dt>License</dt><dd>${escapeHtml(project.license)}</dd></div><div class="fact"><dt>Owner</dt><dd>${escapeHtml(org.name)}</dd></div><div class="fact"><dt>Review date</dt><dd>${escapeHtml(project.last_reviewed)}</dd></div></dl><p>프로젝트의 구조화 메타데이터는 YAML로, 소개·설치·사용법은 Markdown으로 관리합니다.</p></section>
+        <section class="tab-panel" id="panel-governance" role="tabpanel" aria-labelledby="tab-governance" data-tab-panel="governance" hidden><h2>Governance</h2><p class="tab-intro">프로젝트의 담당기관과 라이선스, 정보 확인일을 안내합니다. 구체적인 운영 및 기여 정책은 공식 저장소를 확인하세요.</p><dl class="overview-facts"><div class="fact"><dt>Maturity</dt><dd>${maturityLabel(project.maturity)}</dd></div><div class="fact"><dt>License</dt><dd>${licenseLabel(project.license)}</dd></div><div class="fact"><dt>담당기관</dt><dd>${escapeHtml(org.name)}</dd></div><div class="fact"><dt>정보 확인일</dt><dd>${escapeHtml(project.last_reviewed)}</dd></div></dl><p>성숙도와 담당자 등 미등록 정보는 각 기관에서 보완할 예정입니다.</p></section>
         <section class="tab-panel" id="panel-contact" role="tabpanel" aria-labelledby="tab-contact" data-tab-panel="contact" hidden><h2>Contact us</h2><p class="tab-intro">질문과 기여 제안은 공식 저장소 또는 아래 프로젝트 담당자에게 전달할 수 있습니다.</p><div class="people-list">${maintainers}</div>${org.website ? `<p><a class="button secondary" href="${escapeHtml(org.website)}" target="_blank" rel="noopener noreferrer">기관 페이지 방문 ↗</a></p>` : ''}</section>
-      </main>
+      </div>
       <aside class="project-sidebar" aria-label="프로젝트 보조 정보">
         <section class="sidebar-card"><h2>Project links</h2><div class="sidebar-links">${links || '<span>등록된 외부 링크 없음</span>'}</div></section>
         <section class="sidebar-card organization-panel"><div class="organization-emblem" aria-hidden="true">${escapeHtml(org.short_name)}</div><strong>${escapeHtml(org.name)}</strong><span>${escapeHtml(org.country || '')} · Project organization</span></section>
@@ -330,13 +328,12 @@ function renderOrganizations() {
     const link = org.website || org.github;
     return `<article class="org-card">
       <div class="org-monogram">${escapeHtml(org.short_name)}</div>
-      <div class="tag-row">${org.demo ? '<span class="badge demo">DUMMY</span>' : '<span class="badge active">VERIFIED SOURCE</span>'}</div>
       <h2>${escapeHtml(org.name)}</h2>
       <p>${escapeHtml(org.description)}</p>
-      <div class="org-meta"><span>${count}개 프로젝트</span>${link ? `<a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">기관 링크 ↗</a>` : '<span>예시 기관</span>'}</div>
+      <div class="org-meta"><span>${count}개 프로젝트</span>${link ? `<a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">기관 홈페이지 ↗</a>` : ''}</div>
     </article>`;
   }).join('');
-  const body = `<section class="page-hero"><div class="shell"><p class="eyebrow">Organizations</p><h1>참여 기관</h1><p class="lead">각 기관은 자신이 관리하는 프로젝트의 구조화 정보와 사용 문서를 Pull Request로 갱신합니다.</p></div></section><div class="shell org-grid">${cards}</div>`;
+  const body = `<section class="page-hero"><div class="shell"><p class="eyebrow">Organizations</p><h1>참여 기관</h1><p class="lead">각 기관이 담당하는 SDV 프로젝트와 공개 저장소를 살펴보세요.</p></div></section><div class="shell org-grid">${cards}</div>`;
   return layout({ title: '참여 기관', description: 'SDV 공개 소프트웨어 카탈로그에 참여하는 기관 목록입니다.', current: 'organizations', body });
 }
 
@@ -376,9 +373,13 @@ last_reviewed: "2026-09-28"`;
 }
 
 function statusLabel(status) {
-  return ({ active: 'Active', maintained: 'Maintained', experimental: 'Experimental', archived: 'Archived' })[status] || status;
+  return ({ unknown: '담당기관 확인 예정', active: 'Active', maintained: 'Maintained', experimental: 'Experimental', archived: 'Archived' })[status] || status;
 }
 
 function maturityLabel(maturity) {
-  return ({ concept: 'Concept', sandbox: 'Sandbox', incubation: 'Incubation', production: 'Production' })[maturity] || maturity;
+  return ({ unknown: '정보 미등록', concept: 'Concept', sandbox: 'Sandbox', incubation: 'Incubation', production: 'Production' })[maturity] || maturity;
+}
+
+function licenseLabel(license) {
+  return license === 'NOASSERTION' ? '라이선스 확인 필요' : escapeHtml(license);
 }

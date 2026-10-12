@@ -1,0 +1,8 @@
+schema_version: "1.0"
+slug: keti
+name: 한국전자기술연구원
+short_name: KETI
+description: SDV_AIFW 프로젝트의 담당기관입니다.
+website: https://www.keti.re.kr
+country: KR
+

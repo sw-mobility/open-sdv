@@ -1,7 +1,0 @@
-schema_version: "1.0"
-slug: openroad-lab
-name: OpenRoad Systems Lab
-short_name: ORL
-description: 안전한 차량 소프트웨어 공급망과 시뮬레이션을 연구하는 예시 기관입니다.
-country: KR
-demo: true

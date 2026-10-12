@@ -1,0 +1,8 @@
+schema_version: "1.0"
+slug: mando
+name: HL만도
+short_name: 만도
+description: OMP_Cloudie, OMP_Xrite, OMP_PHM 프로젝트의 담당기관입니다.
+website: https://www.hlmando.com
+country: KR
+

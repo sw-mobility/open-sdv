@@ -1,7 +1,0 @@
-schema_version: "1.0"
-slug: hanul-mobility
-name: Hanul Mobility Research
-short_name: HMR
-description: 차량 엣지와 클라우드 연동 기술을 실험하는 예시 연구기관입니다.
-country: KR
-demo: true

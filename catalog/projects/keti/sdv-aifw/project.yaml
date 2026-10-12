@@ -1,0 +1,17 @@
+schema_version: "1.0"
+slug: sdv-aifw
+name: SDV_AIFW
+organization: keti
+summary: 한국전자기술연구원이 담당하는 SDV_AIFW 프로젝트입니다. 프로젝트 소개와 사용 문서는 담당기관이 등록할 예정입니다.
+repository: https://github.com/sw-mobility/SDV_AIFW
+repository_status: unconfirmed
+status: unknown
+maturity: unknown
+license: NOASSERTION
+categories:
+  - 정보 등록 중
+sdv_layers: []
+technologies: []
+maintainers: []
+last_reviewed: "2026-10-12"
+
