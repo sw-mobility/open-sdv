@@ -2,13 +2,8 @@ schema_version: "1.0"
 slug: sdv-aifw
 name: SDV_AIFW
 organization: keti
-summary: ""
+summary: AIFW for On-Device. Upload your dataset, upload your model, train your model
 repository: https://github.com/sw-mobility/SDV_AIFW
 repository_status: private
-license: ""
-categories: []
-sdv_layers: []
-technologies: []
-maintainers: []
-last_reviewed: "2026-10-12"
-body: ""
+last_reviewed: 2026-10-12
+featured: false
