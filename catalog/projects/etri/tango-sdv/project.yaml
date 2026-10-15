@@ -6,7 +6,6 @@ summary: 데이터 준비부터 신경망 모델 생성·학습·대상 장치 �
 repository: https://github.com/sw-mobility/TANGO-SDV
 repository_status: public
 documentation: https://github.com/sw-mobility/TANGO-SDV/tree/main/docs
-status: unknown
 license: NOASSERTION
 categories:
   - AI / ML

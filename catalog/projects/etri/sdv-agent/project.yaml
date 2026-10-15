@@ -5,7 +5,6 @@ organization: etri
 summary: 이미지 데이터를 업로드하고 AWS S3와 로컬 디렉터리를 동기화하는 기능을 제공하는 SDV 에이전트 프로젝트입니다.
 repository: https://github.com/sw-mobility/SDV_agent
 repository_status: public
-status: unknown
 license: Apache-2.0
 categories:
   - 데이터

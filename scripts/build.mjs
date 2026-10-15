@@ -13,6 +13,7 @@ import { createPagesConfig, pagesConfigShape, pagesProjectUrl } from './pages-co
 import { isDeepStrictEqual } from 'node:util';
 import { stringify as stringifyYaml } from 'yaml';
 import { createProjectValidator, normalizeProjectSource } from './project-data.mjs';
+import { sdvLayerLabels } from '../site/project-labels.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dist = path.join(root, 'dist');
@@ -143,7 +144,7 @@ async function loadProjects() {
 }
 
 function validateRelations() {
-  const projectNames = new Set(projects.map((p) => p.name));
+  const projectNames = new Set(projects.flatMap((p) => [p.slug, p.name]));
   for (const project of projects) {
     if (!organizationMap.has(project.organization)) {
       throw new Error(`${project.slug}: unknown organization '${project.organization}'`);
@@ -201,7 +202,7 @@ function layout({ title, description, current, body }) {
   </div>
   <header class="site-header">
     <nav class="nav" aria-label="주요 메뉴">
-      <a class="brand" href="${url('/')}" aria-label="Open SDV 프로젝트 목록"><img class="brand-mark" src="${url('/assets/open-sdv-mark.svg')}" alt="" width="48" height="48"><span class="brand-copy"><strong>Open <span>SDV</span></strong><small>Project Catalog</small></span></a>
+      <a class="brand" href="${url('/')}" aria-label="Open SDV 프로젝트 목록"><span class="brand-mark" aria-hidden="true">SDV</span><span class="brand-copy"><strong>Open <span>SDV</span></strong><small>Project Catalog</small></span></a>
       <div class="nav-links">
         <a href="${url('/')}" ${current === 'projects' ? 'aria-current="page"' : ''}>프로젝트</a>
         <a href="${url('/organizations/')}" ${current === 'organizations' ? 'aria-current="page"' : ''}>참여 기관</a>
@@ -255,7 +256,7 @@ function renderCatalog() {
         </div>
         <div class="control">
           <label for="layer-filter">SDV 계층</label>
-          <select id="layer-filter" name="layer" data-filter="layer"><option value="">모든 계층</option>${layers.map((item) => `<option value="${item}">${item}</option>`).join('')}</select>
+          <select id="layer-filter" name="layer" data-filter="layer"><option value="">모든 계층</option>${layers.map((item) => `<option value="${item}">${sdvLayerLabels[item] || item}</option>`).join('')}</select>
         </div>
       </div>
       <div class="filter-summary" data-filter-summary hidden><div class="filter-chips" data-filter-chips aria-label="선택한 검색 조건"></div><button class="reset-filters" type="button" data-clear-filters>전체 초기화</button></div>
@@ -272,7 +273,7 @@ function renderProjectCard(project) {
   const searchText = [project.name, project.summary, org.name, org.short_name, ...project.categories, ...(project.technologies || [])].join(' ');
   return `<a class="project-card" href="${url(`/projects/${project.slug}/`)}" data-project-card data-organization="${escapeHtml(project.organization)}" data-search="${escapeHtml(searchText)}" data-categories="${escapeHtml(project.categories.map((v) => v.toLowerCase()).join('|'))}" data-layers="${escapeHtml(project.sdv_layers.join('|'))}" aria-label="${escapeHtml(project.name)} · ${escapeHtml(org.name)} 상세 보기">
     <div class="project-card-accent" aria-hidden="true"></div><div class="project-card-body">
-    <div class="card-top">${renderOrganizationLogo(org, 'card')}${project.repository_status === 'private' ? '<span class="badge">비공개</span>' : ''}</div>
+    <div class="card-top">${renderOrganizationLogo(org, 'card')}${!project.repository ? '<span class="badge">저장소 미등록</span>' : project.repository_status === 'private' ? '<span class="badge">비공개</span>' : project.repository_status !== 'public' ? '<span class="badge">공개 여부 확인 중</span>' : ''}</div>
     <h3>${escapeHtml(project.name)}</h3>
     <p class="summary">${escapeHtml(project.summary) || '프로젝트 정보 준비 중'}</p>
     <div class="tag-row">${project.categories.slice(0, 3).map((category) => `<span class="tag">${escapeHtml(category)}</span>`).join('')}</div>

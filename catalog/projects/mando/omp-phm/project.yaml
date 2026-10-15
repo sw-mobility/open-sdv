@@ -5,7 +5,6 @@ organization: mando
 summary: 만도가 담당하는 데이터 기반 기능 프로젝트입니다. 구체적인 기능과 적용 환경은 담당기관의 상세 설명을 등록할 예정입니다.
 repository: https://github.com/sw-mobility/OMP_PHM
 repository_status: public
-status: unknown
 license: Apache-2.0
 categories:
   - 데이터
@@ -24,4 +23,3 @@ body: |+
   ## 정보 출처
 
 featured: false
-demo: false

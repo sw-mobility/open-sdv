@@ -5,7 +5,6 @@ organization: mando
 summary: 차량과 클라우드를 연결하는 데이터 레이크, MLOps 및 SDV 애플리케이션 실행·개발 환경을 다루는 프로젝트입니다.
 repository: https://github.com/sw-mobility/OMP_Cloudie
 repository_status: public
-status: unknown
 license: Apache-2.0
 categories:
   - 클라우드
@@ -35,4 +34,3 @@ body: |+
   ## 정보 출처
 
 featured: false
-demo: false

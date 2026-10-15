@@ -5,7 +5,6 @@ organization: mando
 summary: TI TDA4VM 기반 보드에 적용하는 Yocto 플랫폼 소프트웨어로, TI SDK와 Edge AI 레이어 구성 방법을 제공합니다.
 repository: https://github.com/sw-mobility/OMP_Xrite
 repository_status: public
-status: unknown
 license: Apache-2.0
 categories:
   - 플랫폼

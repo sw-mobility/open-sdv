@@ -5,7 +5,6 @@ organization: keti
 summary: ""
 repository: https://github.com/sw-mobility/SDV_AIFW
 repository_status: private
-status: unknown
 license: ""
 categories: []
 sdv_layers: []

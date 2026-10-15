@@ -5,7 +5,6 @@ organization: gachon
 summary: 엣지 장치에서 실행하는 경량 비전 AI 모델과 자율주행 인지 소프트웨어를 연구하며, YOLO 계열 추론 예제를 제공합니다.
 repository: https://github.com/sw-mobility/Edge_Vision
 repository_status: public
-status: unknown
 license: Apache-2.0
 categories:
   - AI / ML

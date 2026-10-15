@@ -11,7 +11,6 @@
     "name",
     "organization",
     "summary",
-    "status",
     "license",
     "categories",
     "sdv_layers",
@@ -29,7 +28,6 @@
     "homepage": { "type": "string", "format": "uri" },
     "documentation": { "type": "string", "format": "uri" },
     "repository_status": { "enum": ["public", "private", "unconfirmed"] },
-    "status": { "enum": ["unknown", "active", "maintained", "experimental", "archived"] },
     "license": { "type": "string", "anyOf": [{ "maxLength": 0 }, { "minLength": 2 }] },
     "categories": {
       "type": "array",
@@ -65,7 +63,6 @@
       }
     },
     "last_reviewed": { "type": "string", "format": "date" },
-    "featured": { "type": "boolean" },
-    "demo": { "type": "boolean" }
+    "featured": { "type": "boolean" }
   }
 }
