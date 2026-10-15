@@ -1,6 +1,7 @@
 .editor-index { padding-block: 36px 72px; display: grid; gap: 20px; }
 .edit-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
 .edit-hint { color: var(--blue-700); font-size: 14px; margin-top: 22px; }
+.page-hero .edit-hint { color: #d7e8f8; }
 .edit-steps { margin: 20px 0; padding-left: 24px; }
 .edit-steps li { padding: 8px 0 14px 8px; }
 .editor-choice .edit-steps li { display: list-item; border-top: 0; }

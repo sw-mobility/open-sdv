@@ -191,10 +191,10 @@ p { margin-top: 0; }
 .institution-projects a { display: flex; justify-content: space-between; gap: 12px; align-items: center; min-height: 44px; padding: 8px 0; border-top: 1px solid #e5e9ee; text-decoration: none; font-size: 14px; font-weight: 700; }
 .institution-projects a:hover { text-decoration: underline; }
 .org-meta { display: flex; justify-content: space-between; gap: 16px; margin-top: auto; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12px; }
-.guide-layout { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 44px; padding-block: 44px 76px; }
+.guide-layout { display: grid; grid-template-columns: minmax(0, 1fr); padding-block: 44px 76px; }
 .guide-nav { position: sticky; top: 125px; align-self: start; display: grid; border-top: 2px solid var(--blue-700); }
 .guide-nav a { padding: 11px 5px; color: #475562; border-bottom: 1px solid var(--line); text-decoration: none; }
-.guide-content { background: #fff; border: 1px solid var(--line); padding: 34px 42px; }
+.guide-content { min-width: 0; background: #fff; border: 1px solid var(--line); padding: 34px 42px; overflow-wrap: anywhere; }
 .guide-content section + section { margin-top: 48px; }
 .guide-content h2 { padding-bottom: 10px; border-bottom: 1px solid var(--line); }
 .steps li { margin-bottom: 18px; padding-left: 6px; }
