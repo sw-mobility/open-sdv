@@ -1,0 +1,271 @@
+# Pages CMS configuration. Regenerate with npm run cms:config after adding projects.
+settings:
+  hide: true
+  content:
+    merge: true
+  commit:
+    templates:
+      update: "content: update {name} via Pages CMS"
+content:
+  - name: gachon
+    label: 가천대학교
+    type: group
+    items:
+      - name: edge-vision
+        label: Edge_Vision
+        type: file
+        path: catalog/projects/gachon/edge-vision/project.yaml
+        format: yaml
+        operations:
+          create: false
+          rename: false
+          delete: false
+        fields: &a1
+          - name: schema_version
+            label: 스키마 버전
+            type: string
+            hidden: true
+            readonly: true
+          - name: slug
+            label: 프로젝트 식별자
+            type: string
+            hidden: true
+            readonly: true
+          - name: organization
+            label: 담당기관 식별자
+            type: string
+            hidden: true
+            readonly: true
+          - name: name
+            label: 01 · 프로젝트 이름
+            type: string
+            required: true
+            options:
+              minlength: 2
+              maxlength: 80
+            description: "프로젝트 목록과 상세 페이지의 제목입니다. 예: OMP_Xrite"
+          - name: summary
+            label: 02 · 한 줄 소개
+            type: text
+            pattern:
+              regex: ^(?:[\s\S]{30,260})?$
+              message: 비워두거나 30~260자로 작성하세요.
+            description: 목록 카드에 표시됩니다. 어떤 문제를 해결하는지, 누가 사용하는지 간단히 설명하세요.
+          - name: body
+            label: 03 · 프로젝트 소개와 사용법
+            type: rich-text
+            options:
+              format: markdown
+              switcher: true
+              media: false
+            description: 상세 페이지의 개요 본문입니다. 프로젝트 소개 → 지원 환경 → 설치 → 사용 예제 → 기여 방법 순서로 작성하면 좋습니다. 비공개 정보와 비밀번호는 넣지 마세요.
+          - name: repository
+            label: 04 · 소스 코드 저장소
+            type: string
+            pattern:
+              regex: ^(?:https?://.+)?$
+              message: https://로 시작하는 저장소 주소를 입력하세요.
+            description: 프로젝트 소스 코드가 있는 GitHub 주소입니다.
+          - name: repository_status
+            label: 저장소 공개 상태
+            type: select
+            options:
+              values:
+                - name: public
+                  label: 공개
+                - name: private
+                  label: 비공개 · 접근 권한 필요
+                - name: unconfirmed
+                  label: 확인 중
+          - name: documentation
+            label: 개발 문서 주소
+            type: string
+            pattern: ^(?:https?://.+)?$
+            description: 설치·사용 가이드 주소입니다. 별도 문서가 없으면 비워두세요.
+          - name: homepage
+            label: 프로젝트 홈페이지 주소
+            type: string
+            pattern: ^(?:https?://.+)?$
+            description: 기관 홈페이지가 아닌 프로젝트 전용 주소입니다. 없으면 비워두세요.
+          - name: license
+            label: 05 · 라이선스
+            type: string
+            description: "예: Apache-2.0, MIT, EPL-2.0. 확인되지 않았으면 비워두세요."
+          - name: categories
+            label: 06 · 기술 분류
+            type: string
+            list: true
+            description: "항목 추가로 하나씩 입력하세요. 예: 플랫폼, 클라우드, AI / ML. 목록 카드와 분류 필터에 사용합니다."
+          - name: sdv_layers
+            label: SDV 적용 계층
+            type: select
+            options:
+              values:
+                - name: vehicle
+                  label: 차량
+                - name: edge
+                  label: 엣지
+                - name: cloud
+                  label: 클라우드
+                - name: tooling
+                  label: 개발 도구
+                - name: data
+                  label: 데이터
+                - name: safety
+                  label: 안전
+              multiple: true
+          - name: technologies
+            label: 사용 기술
+            type: string
+            list: true
+            description: "언어·프레임워크·프로토콜을 하나씩 입력하세요. 예: Python, Yocto, ROS 2"
+          - name: integrates_with
+            label: 함께 사용하는 프로젝트
+            type: string
+            list: true
+            description: 연동 관계가 있는 등록 프로젝트 이름을 정확히 입력하세요. 없으면 비워두세요.
+          - name: maintainers
+            label: 07 · 공개 담당자
+            type: object
+            list:
+              collapsible:
+                collapsed: false
+                summary: "{name} · {role}"
+            description: 공개 가능한 이름·팀명과 GitHub 계정을 입력하세요. 개인 전화번호 등은 입력하지 마세요.
+            fields:
+              - name: name
+                label: 이름 또는 팀명
+                type: string
+                required: true
+              - name: role
+                label: 역할
+                type: string
+                required: true
+                description: "예: 프로젝트 담당, 개발, Maintainer"
+              - name: github
+                label: GitHub 계정명
+                type: string
+                pattern:
+                  regex: ^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$
+                  message: URL이 아닌 GitHub 계정명만 입력하세요.
+                description: https://github.com/ 부분을 제외한 계정명입니다.
+          - name: status
+            label: 08 · 운영 상태
+            type: select
+            options:
+              values:
+                - name: unknown
+                  label: 확인 예정
+                - name: active
+                  label: 개발 중
+                - name: maintained
+                  label: 유지 관리
+                - name: experimental
+                  label: 실험
+                - name: archived
+                  label: 보관
+          - name: maturity
+            label: 프로젝트 성숙도
+            type: select
+            options:
+              values:
+                - name: unknown
+                  label: 미등록
+                - name: concept
+                  label: 개념
+                - name: sandbox
+                  label: 샌드박스
+                - name: incubation
+                  label: 인큐베이션
+                - name: production
+                  label: 운영 적용
+          - name: last_reviewed
+            label: 09 · 정보 확인일
+            type: date
+            required: true
+            options:
+              time: false
+              format: yyyy-MM-dd
+            description: 입력한 정보를 마지막으로 확인한 날짜입니다. 수정 시 오늘 날짜로 갱신하세요.
+          - name: featured
+            label: 대표 프로젝트 표시
+            type: boolean
+            hidden: true
+            readonly: true
+          - name: demo
+            label: 예제 데이터 표시
+            type: boolean
+            hidden: true
+            readonly: true
+  - name: keti
+    label: 한국전자기술연구원
+    type: group
+    items:
+      - name: sdv-aifw
+        label: SDV_AIFW
+        type: file
+        path: catalog/projects/keti/sdv-aifw/project.yaml
+        format: yaml
+        operations:
+          create: false
+          rename: false
+          delete: false
+        fields: *a1
+  - name: etri
+    label: 한국전자통신연구원
+    type: group
+    items:
+      - name: sdv-agent
+        label: SDV_agent
+        type: file
+        path: catalog/projects/etri/sdv-agent/project.yaml
+        format: yaml
+        operations:
+          create: false
+          rename: false
+          delete: false
+        fields: *a1
+      - name: tango-sdv
+        label: TANGO-SDV
+        type: file
+        path: catalog/projects/etri/tango-sdv/project.yaml
+        format: yaml
+        operations:
+          create: false
+          rename: false
+          delete: false
+        fields: *a1
+  - name: mando
+    label: HL만도
+    type: group
+    items:
+      - name: omp-cloudie
+        label: OMP_Cloudie
+        type: file
+        path: catalog/projects/mando/omp-cloudie/project.yaml
+        format: yaml
+        operations:
+          create: false
+          rename: false
+          delete: false
+        fields: *a1
+      - name: omp-phm
+        label: OMP_PHM
+        type: file
+        path: catalog/projects/mando/omp-phm/project.yaml
+        format: yaml
+        operations:
+          create: false
+          rename: false
+          delete: false
+        fields: *a1
+      - name: omp-xrite
+        label: OMP_Xrite
+        type: file
+        path: catalog/projects/mando/omp-xrite/project.yaml
+        format: yaml
+        operations:
+          create: false
+          rename: false
+          delete: false
+        fields: *a1

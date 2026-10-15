@@ -7,6 +7,12 @@ import addFormats from 'ajv-formats';
 import { marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
 import { parse as parseYaml } from 'yaml';
+import { renderEditorIndex } from './edit-index.mjs';
+import { renderProject as projectView } from '../site/project-view.js';
+import { createPagesConfig, pagesConfigShape, pagesRepositoryUrl, pagesProjectUrl } from './pages-config.mjs';
+import { isDeepStrictEqual } from 'node:util';
+import { stringify as stringifyYaml } from 'yaml';
+import { createProjectValidator, normalizeProjectSource } from './project-data.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dist = path.join(root, 'dist');
@@ -21,7 +27,7 @@ const [projectSchema, organizationSchema] = await Promise.all([
   readJson('schemas/project.schema.json'),
   readJson('schemas/organization.schema.json'),
 ]);
-const validateProject = ajv.compile(projectSchema);
+const validateProject = createProjectValidator(projectSchema);
 const validateOrganization = ajv.compile(organizationSchema);
 
 const organizations = await loadOrganizations();
@@ -29,6 +35,15 @@ const organizationMap = new Map(organizations.map((org) => [org.slug, org]));
 const projects = await loadProjects();
 
 validateRelations();
+
+const pagesConfig = createPagesConfig(projects, organizations);
+if (process.argv.includes('--cms-config')) {
+  await fs.writeFile(path.join(root, '.pages.yml'), '# Pages CMS configuration. Regenerate with npm run cms:config after adding projects.\n' + stringifyYaml(pagesConfig, { lineWidth: 0 }));
+  console.log('Updated .pages.yml for Pages CMS.');
+  process.exit(0);
+}
+const savedConfig = parseYaml(await fs.readFile(path.join(root, '.pages.yml'), 'utf8'));
+if (!isDeepStrictEqual(pagesConfigShape(savedConfig), pagesConfigShape(pagesConfig))) throw new Error('Pages CMS config is out of date. Run npm run cms:config and commit .pages.yml with the project changes.');
 
 if (checkOnly) {
   console.log(`Validated ${organizations.length} organizations and ${projects.length} projects.`);
@@ -40,19 +55,26 @@ await fs.mkdir(dist, { recursive: true });
 await Promise.all([
   fs.copyFile(path.join(root, 'site/styles.css'), path.join(dist, 'styles.css')),
   fs.copyFile(path.join(root, 'site/catalog.js'), path.join(dist, 'catalog.js')),
+  fs.copyFile(path.join(root, 'site/edit-index.css'), path.join(dist, 'edit-index.css')),
   fs.copyFile(path.join(root, 'site/favicon.svg'), path.join(dist, 'favicon.svg')),
   fs.cp(path.join(root, 'site/assets'), path.join(dist, 'assets'), { recursive: true }),
 ]);
+
+
+const editorHelpers = { layout, url, escapeHtml, renderOrganizationLogo };
 
 await Promise.all([
   writePage('index.html', renderCatalog()),
   writePage('organizations/index.html', renderOrganizations()),
   writePage('contribute/index.html', renderContribute()),
+  writePage('edit/index.html', renderEditorIndex(projects, organizations, editorHelpers)),
+  writePage('admin/index.html', renderEditorIndex(projects, organizations, editorHelpers)),
   ...projects.map((project) => writePage(`projects/${project.slug}/index.html`, renderProject(project))),
+  ...projects.map((project) => writePage(`projects/${project.slug}/edit/index.html`, renderProjectEditorEntry(project))),
   fs.writeFile(path.join(dist, 'catalog.json'), JSON.stringify({ organizations, projects: projects.map(({ markdown, html, ...p }) => p) }, null, 2)),
 ]);
 
-console.log(`Built ${projects.length + 3} pages into ${dist}`);
+console.log(`Built ${projects.length * 2 + 5} pages into ${dist}`);
 
 async function readJson(relativePath) {
   return JSON.parse(await fs.readFile(path.join(root, relativePath), 'utf8'));
@@ -92,14 +114,15 @@ async function loadProjects() {
   const seen = new Set();
   const result = [];
   for (const file of files) {
-    const data = parseYaml(await fs.readFile(file, 'utf8'));
-    if (!validateProject(data)) failValidation(file, validateProject.errors);
+    const source = normalizeProjectSource(parseYaml(await fs.readFile(file, 'utf8')));
+    const errors = validateProject(source);
+    if (errors.length) throw new Error(`Invalid project ${file}: ${errors.map(error => `${error.path}: ${error.message}`).join(' / ')}`);
+    const { body: cmsBody, ...data } = source;
+    const expectedDirectory = path.join(root, 'catalog/projects', data.organization, data.slug);
+    if (path.dirname(file) !== expectedDirectory) throw new Error(`Project identity does not match its folder: ${file}`);
     if (seen.has(data.slug)) throw new Error(`Duplicate project slug: ${data.slug}`);
     seen.add(data.slug);
-    const readme = path.join(path.dirname(file), 'README.md');
-    const markdown = await fs.readFile(readme, 'utf8').catch(() => {
-      throw new Error(`Missing README.md next to ${file}`);
-    });
+    const markdown = cmsBody;
     const rawHtml = await marked.parse(markdown, { gfm: true });
     const html = sanitizeHtml(rawHtml, {
       allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
@@ -114,7 +137,7 @@ async function loadProjects() {
         img: sanitizeHtml.simpleTransform('img', { loading: 'lazy' }),
       },
     });
-    result.push({ ...data, markdown, html });
+    result.push({ ...data, markdown, html, sourcePath: path.relative(root, path.dirname(file)).replaceAll('\\', '/') });
   }
   return result.sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)) || a.name.localeCompare(b.name, 'ko-KR'));
 }
@@ -182,7 +205,7 @@ function layout({ title, description, current, body }) {
       <div class="nav-links">
         <a href="${url('/')}" ${current === 'projects' ? 'aria-current="page"' : ''}>프로젝트</a>
         <a href="${url('/organizations/')}" ${current === 'organizations' ? 'aria-current="page"' : ''}>참여 기관</a>
-        <a href="${url('/contribute/')}" ${current === 'contribute' ? 'aria-current="page"' : ''}>프로젝트 등록</a>
+        <a href="${url('/contribute/')}" ${current === 'contribute' ? 'aria-current="page"' : ''}>등록·수정</a>
       </div>
     </nav>
   </header>
@@ -190,7 +213,7 @@ function layout({ title, description, current, body }) {
   <footer class="site-footer">
     <div class="shell footer-inner">
       <p>Open SDV Project DB · 여러 기관이 함께 관리하는 공개 소프트웨어 레지스트리</p>
-      <p><a href="${url('/contribute/')}">YAML과 Markdown으로 프로젝트 등록하기</a></p>
+      <p><a href="${url('/contribute/')}">프로젝트 정보 수정 안내</a></p>
     </div>
   </footer>
 </body>
@@ -216,7 +239,7 @@ function renderCatalog() {
       </div>
     </section>
     <section class="shell catalog-body" aria-labelledby="project-list-title">
-      <div class="section-heading"><h2>프로젝트 찾기</h2><p>기관과 기술 분야를 선택하거나 프로젝트 이름으로 검색하세요.</p></div>
+      <div class="section-heading"><h2>프로젝트 찾기</h2><p>기관과 기술 분야를 선택하거나 프로젝트 이름으로 검색하세요.</p><a class="catalog-editor-link" href="${url('/edit/')}">기관 담당자 · 프로젝트 정보 수정 →</a></div>
       <div class="filter-panel" role="search">
         <div class="control">
           <label for="project-search">프로젝트 검색</label><span class="search-icon" aria-hidden="true"></span>
@@ -259,76 +282,13 @@ function renderProjectCard(project) {
 }
 
 function renderProject(project) {
-  const org = organizationMap.get(project.organization);
-  const externalLinks = [
-    project.homepage ? ['프로젝트 홈페이지', project.homepage] : null,
-    project.repository ? ['GitHub 저장소', project.repository] : null,
-    project.documentation ? ['개발 문서', project.documentation] : null,
-  ].filter(Boolean);
-  const links = externalLinks.map(([label, href]) => `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)} ↗</a>`).join('');
-  const actions = [
-    project.repository ? `<a class="button" href="${escapeHtml(project.repository)}" target="_blank" rel="noopener noreferrer">${project.repository_status === 'private' ? '저장소 링크' : '소스 코드'} ↗</a>` : '',
-    project.documentation ? `<a class="button secondary" href="${escapeHtml(project.documentation)}" target="_blank" rel="noopener noreferrer">개발 문서 ↗</a>` : '',
-  ].filter(Boolean).join('');
-  const integrationNames = project.integrates_with || [];
-  const siblingProjects = projects.filter((item) => item.organization === project.organization && item.slug !== project.slug);
-  const integrationLinks = integrationNames.map((name) => {
-    const match = projects.find((p) => p.name === name);
-    return match ? `<li><a href="${url(`/projects/${match.slug}/`)}">${escapeHtml(name)}</a></li>` : `<li>${escapeHtml(name)}</li>`;
-  }).join('') || '<li>등록된 연동 프로젝트 없음</li>';
-  const technologyTags = (project.technologies || []).map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join('') || '<span class="tag">정보 없음</span>';
-  const maintainers = project.maintainers.map((maintainer) => `<div class="person"><strong>${escapeHtml(maintainer.name)}</strong><p>${escapeHtml(maintainer.role)}${maintainer.github ? ` · <a href="https://github.com/${escapeHtml(maintainer.github)}" target="_blank" rel="noopener noreferrer">GitHub ↗</a>` : ''}</p></div>`).join('') || '<div class="person"><strong>프로젝트 담당자</strong><p>담당기관에서 담당 팀과 공개 연락 경로를 등록할 예정입니다.</p></div>';
-  const resourceRows = externalLinks.length ? externalLinks.map(([label, href]) => `<div class="resource-item"><strong>${escapeHtml(label)}</strong><p><a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(href)}</a></p></div>`).join('') : '<div class="resource-item"><strong>Resources</strong><p>외부 링크가 아직 등록되지 않았습니다.</p></div>';
-  const body = `
-    <header class="project-header">
-      <div class="shell"><div class="breadcrumbs"><a href="${url('/')}" data-project-list>← 프로젝트 목록</a><span>›</span>${escapeHtml(project.name)}</div>
-        <div class="project-title-row">
-          <div>
-            <p class="project-kicker">${escapeHtml(org.name)}</p>
-            <h1>${escapeHtml(project.name)}</h1>
-            <p class="detail-summary">${escapeHtml(project.summary) || '프로젝트 정보 준비 중'}</p>
-          </div>
-          ${actions ? `<div class="project-actions">${actions}</div>` : ''}
-        </div>
-      </div>
-      <div class="project-tab-bar"><div class="shell project-tabs" role="tablist" aria-label="프로젝트 정보" data-project-tabs>
-        <button type="button" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true" data-tab="overview">개요</button>
-        <button type="button" role="tab" id="tab-downloads" aria-controls="panel-downloads" aria-selected="false" tabindex="-1" data-tab="downloads">소스·문서</button>
-        <button type="button" role="tab" id="tab-people" aria-controls="panel-people" aria-selected="false" tabindex="-1" data-tab="people">참여기관</button>
-        <button type="button" role="tab" id="tab-resources" aria-controls="panel-resources" aria-selected="false" tabindex="-1" data-tab="resources">개발 자료</button>
-        <button type="button" role="tab" id="tab-governance" aria-controls="panel-governance" aria-selected="false" tabindex="-1" data-tab="governance">운영 정보</button>
-        <button type="button" role="tab" id="tab-contact" aria-controls="panel-contact" aria-selected="false" tabindex="-1" data-tab="contact">문의·기여</button>
-      </div></div>
-    </header>
-    <div class="project-page"><div class="shell project-layout">
-      <div class="project-main">
-        <section class="tab-panel" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-tab-panel="overview">
-          <h2>프로젝트 개요</h2>${project.summary ? `<p class="tab-intro">${escapeHtml(project.summary)}</p>` : ''}
-          <dl class="overview-facts">
-            <div class="fact"><dt>담당기관</dt><dd>${escapeHtml(org.short_name)}</dd></div>
-            <div class="fact"><dt>라이선스</dt><dd>${licenseLabel(project.license)}</dd></div>
-            <div class="fact"><dt>저장소</dt><dd>${project.repository_status === 'private' ? '비공개 · 접근 권한 필요' : 'GitHub · 공개'}</dd></div>
-            <div class="fact"><dt>정보 확인일</dt><dd>${escapeHtml(project.last_reviewed)}</dd></div>
-          </dl>
-          <article class="prose">${project.html.trim() || '<p>프로젝트 소개와 사용법은 담당기관에서 등록할 예정입니다.</p>'}</article>
-        </section>
-        <section class="tab-panel" id="panel-downloads" role="tabpanel" aria-labelledby="tab-downloads" data-tab-panel="downloads" hidden><h2>소스 코드와 문서</h2><p class="tab-intro">소스 코드와 배포 자료는 프로젝트가 관리하는 공식 채널에서 제공합니다.</p><div class="resource-list">${resourceRows}</div></section>
-        <section class="tab-panel" id="panel-people" role="tabpanel" aria-labelledby="tab-people" data-tab-panel="people" hidden><h2>Who's involved</h2><p class="tab-intro">이 프로젝트를 등록하고 유지하는 기관과 담당자입니다.</p><div class="people-list">${maintainers}</div><h3>담당기관</h3><p><strong>${escapeHtml(org.name)}</strong><br>${escapeHtml(org.description)}</p></section>
-        <section class="tab-panel" id="panel-resources" role="tabpanel" aria-labelledby="tab-resources" data-tab-panel="resources" hidden><h2>개발 자료</h2><p class="tab-intro">개발, 통합, 테스트를 시작하는 데 필요한 프로젝트 링크와 기술 정보입니다.</p><div class="resource-list">${resourceRows}</div><h3>사용 기술</h3><div class="tag-row">${technologyTags}</div><h3>SDV 적용 계층</h3><div class="tag-row">${project.sdv_layers.map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join('')}</div></section>
-        <section class="tab-panel" id="panel-governance" role="tabpanel" aria-labelledby="tab-governance" data-tab-panel="governance" hidden><h2>운영 정보</h2><p class="tab-intro">프로젝트의 담당기관과 라이선스, 정보 확인일을 안내합니다. 구체적인 운영 및 기여 정책은 공식 저장소를 확인하세요.</p><dl class="overview-facts"><div class="fact"><dt>Maturity</dt><dd>${maturityLabel(project.maturity)}</dd></div><div class="fact"><dt>License</dt><dd>${licenseLabel(project.license)}</dd></div><div class="fact"><dt>담당기관</dt><dd>${escapeHtml(org.name)}</dd></div><div class="fact"><dt>정보 확인일</dt><dd>${escapeHtml(project.last_reviewed)}</dd></div></dl><p>성숙도와 담당자 등 미등록 정보는 각 기관에서 보완할 예정입니다.</p></section>
-        <section class="tab-panel" id="panel-contact" role="tabpanel" aria-labelledby="tab-contact" data-tab-panel="contact" hidden><h2>문의 및 기여</h2><p class="tab-intro">프로젝트 문의와 개선 제안은 공식 저장소의 안내를 확인한 뒤 전달하세요.</p><div class="sidebar-links"><a href="${escapeHtml(project.repository)}/issues" target="_blank" rel="noopener noreferrer">GitHub Issues에서 문의·제안 ↗</a><a href="${escapeHtml(project.repository)}#readme" target="_blank" rel="noopener noreferrer">README에서 기여 방법 확인 ↗</a></div>${project.maintainers.length ? `<h3>프로젝트 담당자</h3><div class="people-list">${maintainers}</div>` : ''}</section>
-      </div>
-      <aside class="project-sidebar" aria-label="프로젝트 보조 정보">
-        <section class="sidebar-card"><h2>프로젝트 링크</h2><div class="sidebar-links">${links || '<span>등록된 외부 링크 없음</span>'}</div></section>
-        <section class="sidebar-card organization-panel">${renderOrganizationLogo(org, 'detail')}<span>프로젝트 담당기관</span></section>
-        ${integrationNames.length ? `<section class="sidebar-card"><h2>연관 프로젝트</h2><ul class="related-list">${integrationLinks}</ul></section>` : siblingProjects.length ? `<section class="sidebar-card"><h2>같은 기관의 프로젝트</h2><ul class="related-list">${siblingProjects.map((item) => `<li><a href="${url(`/projects/${item.slug}/`)}">${escapeHtml(item.name)}</a></li>`).join('')}</ul></section>` : ''}
-        <section class="sidebar-card"><h2>기술 분류</h2><div class="tag-row">${project.categories.map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join('')}${technologyTags}</div></section>
-      </aside>
-    </div></div>
-    <script src="${url('/catalog.js')}" defer></script>`;
-  return layout({ title: project.name, description: project.summary, current: 'projects', body });
+  return projectView(project, { organizationMap, projects, url, escapeHtml, renderOrganizationLogo, layout });
 }
 
+function renderProjectEditorEntry(project) {
+  const org = organizationMap.get(project.organization);
+  return layout({ title: `${project.name} 정보 수정`, current: 'contribute', body: `<link rel="stylesheet" href="${url('/edit-index.css')}"><section class="page-hero"><div class="shell"><div class="breadcrumbs"><a href="${url('/edit/')}">← 수정할 프로젝트 선택</a></div><p class="eyebrow">${escapeHtml(org.name)}</p><h1>${escapeHtml(project.name)} 정보 수정</h1><p class="lead">소개와 사용법을 Pages CMS의 폼에서 편집합니다. Git 명령어나 파일 수정은 필요하지 않습니다.</p><div class="edit-actions"><a class="button" href="${pagesProjectUrl(project.slug)}" target="_blank" rel="noopener noreferrer">Pages CMS에서 수정 ↗</a><a class="button secondary" href="${url(`/projects/${project.slug}/`)}">현재 프로젝트 페이지 보기</a></div></div></section><div class="shell editor-index"><section class="editor-choice"><h2>수정은 이렇게 진행됩니다</h2><ol class="edit-steps"><li><strong>GitHub 계정으로 로그인</strong><p>처음 사용할 때 저장소 접근 승인이 필요할 수 있습니다. 저장소가 보이지 않으면 사이트 관리자에게 문의하세요.</p></li><li><strong>프로젝트 정보를 폼에서 수정</strong><p>이름·한 줄 소개·소개와 사용법·문서 주소·담당자를 작성하세요. 수정 대상은 ${escapeHtml(project.name)}입니다.</p></li><li><strong>내용 확인 후 저장</strong><p>main 브랜치에서 저장하면 GitHub에 변경 내용이 기록됩니다. 자동 검사와 배포가 성공한 뒤 공개 사이트에 반영됩니다.</p></li></ol><p class="edit-notice">저장은 브라우저 임시저장이 아닙니다. 공개 가능한 정보만 작성하세요. 처음 연결할 때는 관리자가 편집 설정을 저장소에 반영하고 서비스 접근을 승인해야 합니다.</p><p><a href="${pagesRepositoryUrl}" target="_blank" rel="noopener noreferrer">프로젝트 폼이 열리지 않으면 저장소부터 선택하기 ↗</a></p></section></div>` });
+}
 function renderOrganizations() {
   const cards = organizations.map((org) => {
     const count = projects.filter((project) => project.organization === org.slug).length;
@@ -346,48 +306,14 @@ function renderOrganizations() {
 }
 
 function renderContribute() {
-  const sample = `schema_version: "1.0"
-slug: my-sdv-project
-name: My SDV Project
-organization: my-organization
-summary: 프로젝트가 해결하는 문제를 1~2문장으로 작성합니다.
-repository: https://github.com/example/my-sdv-project
-status: active
-maturity: incubation
-license: Apache-2.0
-categories:
-  - 미들웨어
-sdv_layers:
-  - vehicle
-  - edge
-maintainers:
-  - name: Project Team
-    role: Maintainer
-last_reviewed: "2026-09-28"`;
-  const body = `
-  <section class="page-hero"><div class="shell"><p class="eyebrow">Contribution workflow</p><h1>프로젝트 등록 가이드</h1><p class="lead">기관은 YAML에는 검색 가능한 사실을, README에는 프로젝트 설명과 사용법을 작성합니다.</p></div></section>
-  <div class="shell guide-layout">
-    <nav class="guide-nav" aria-label="문서 목차"><a href="#workflow">등록 절차</a><a href="#files">파일 구조</a><a href="#yaml">YAML 예시</a><a href="#review">자동 검사</a></nav>
-    <article class="guide-content">
-      <section id="workflow"><h2>등록 절차</h2><ol class="steps"><li><strong>기관 폴더를 확인합니다.</strong><br>처음 참여하는 기관은 조직 YAML도 함께 추가합니다.</li><li><strong>프로젝트 폴더를 만듭니다.</strong><br><code>catalog/projects/{기관}/{프로젝트}/</code> 경로를 사용합니다.</li><li><strong>YAML과 README를 작성합니다.</strong><br>장문의 소개나 설치법을 YAML에 넣지 않습니다.</li><li><strong>Pull Request를 엽니다.</strong><br>검증과 미리보기 확인 후 관리자가 병합합니다.</li></ol></section>
-      <section id="files"><h2>파일 구조</h2><pre><code>catalog/projects/my-organization/my-project/
-├─ project.yaml   # 검색·필터·관계 데이터
-└─ README.md      # 소개·설치·사용·기여 문서</code></pre></section>
-      <section id="yaml"><h2>YAML 예시</h2><pre><code>${escapeHtml(sample)}</code></pre></section>
-      <section id="review"><h2>자동 검사</h2><p>Pull Request에서는 스키마, 중복 slug, 기관 참조, README 존재 여부와 전체 정적 빌드를 검사합니다. 별 수, 최근 릴리스와 커밋일처럼 자주 바뀌는 값은 향후 GitHub API로 수집하고 기관이 직접 적지 않도록 분리합니다.</p></section>
-    </article>
-  </div>`;
-  return layout({ title: '기여 가이드', description: '기관이 SDV 공개 소프트웨어 프로젝트를 YAML과 Markdown으로 등록하는 방법입니다.', current: 'contribute', body });
+  return layout({ title: '프로젝트 등록·수정', description: 'Pages CMS에서 프로젝트 정보를 편집합니다.', current: 'contribute', body: `
+    <section class="page-hero"><div class="shell"><p class="eyebrow">Project management</p><h1>프로젝트 등록·수정</h1><p class="lead">담당 프로젝트를 선택하고 Pages CMS에서 폼으로 수정하세요.</p></div></section>
+    <div class="shell guide-layout"><article class="guide-content">
+    <section><h2>기존 프로젝트 수정</h2><p><a class="button" href="${url('/edit/')}">내 프로젝트 선택 →</a></p><ol class="steps"><li><strong>정보 수정 버튼을 누릅니다.</strong><br>Pages CMS가 새 창에서 열립니다. GitHub 계정으로 로그인하세요.</li><li><strong>한국어 폼에서 내용을 작성합니다.</strong><br>소개와 사용법은 서식 편집기에서 작성하고, 공개 상태와 성숙도 등은 목록에서 선택합니다.</li><li><strong>저장 후 배포 결과를 확인합니다.</strong><br>main 브랜치에 저장하면 자동 검사와 빌드를 거쳐 사이트에 반영됩니다. 저장 성공과 사이트 배포 완료는 다르므로 잠시 후 공개 페이지를 확인하세요.</li></ol><p>관리자 승인이 필요한 경우에는 별도 검토 브랜치에서 저장하고 PR로 병합해야 합니다. Pages CMS를 연결했다고 자동 승인 절차가 생기지는 않습니다.</p></section>
+    <section><h2>처음 사용하는 담당자</h2><p>관리자가 Pages CMS의 GitHub App을 open-sdv 저장소에 연결한 뒤 이용할 수 있습니다. 저장소가 보이지 않거나 저장 권한 오류가 나면 관리자에게 문의하세요. 로그인과 저장은 외부 Pages CMS 서비스에서 처리하며 이 사이트는 토큰이나 비밀번호를 보관하지 않습니다.</p></section>
+    <section><h2>새 프로젝트 등록</h2><p>새 프로젝트는 관리자가 기관·저장소·식별자를 확인하여 항목을 추가합니다. 현재 등록된 ${projects.length}개 프로젝트는 담당자가 내용을 수정할 수 있습니다.</p></section>
+    <section><h2>정보 저장 방식</h2><p>프로젝트별 project.yaml 하나에 기본 정보와 상세 본문이 함께 저장됩니다. 담당자는 파일 구조를 알 필요 없이 폼만 작성하면 됩니다. 기관별 메뉴는 편의를 위한 구분이며 기관별 접근권한 제한은 아닙니다.</p></section></article></div>` });
 }
-
-function statusLabel(status) {
-  return ({ unknown: '담당기관 확인 예정', active: 'Active', maintained: 'Maintained', experimental: 'Experimental', archived: 'Archived' })[status] || status;
-}
-
-function maturityLabel(maturity) {
-  return ({ unknown: '정보 미등록', concept: 'Concept', sandbox: 'Sandbox', incubation: 'Incubation', production: 'Production' })[maturity] || maturity;
-}
-
 function licenseLabel(license) {
   return !license ? '라이선스 미등록' : license === 'NOASSERTION' ? '라이선스 확인 필요' : escapeHtml(license);
 }

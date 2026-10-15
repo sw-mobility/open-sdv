@@ -2,7 +2,7 @@
 
 Open Software Defined Vehicle Framework
 
-이 저장소에는 여러 기관의 SDV 공개 소프트웨어를 YAML과 Markdown으로 관리하고 정적 웹사이트로 생성하는 프로젝트 카탈로그가 포함되어 있습니다.
+이 저장소에는 여러 기관의 SDV 공개 소프트웨어를 Pages CMS와 YAML로 관리하고 정적 웹사이트로 생성하는 프로젝트 카탈로그가 포함되어 있습니다.
 
 ## Year 1: Project Launch
 
@@ -38,9 +38,11 @@ npm run serve
 
 1. `catalog/organizations/{기관}.yaml`에 기관 정보를 추가합니다.
 2. `catalog/projects/{기관}/{프로젝트}/project.yaml`을 작성합니다.
-3. 같은 폴더의 `README.md`에 소개와 사용법을 작성합니다.
+3. 소개와 사용법은 `project.yaml`의 `body`에 Markdown으로 작성합니다. 기존 프로젝트는 `/edit/`에서 선택한 뒤 외부 Pages CMS 폼에서 수정합니다. 별도 프로젝트 README는 사용하지 않습니다.
 4. `npm run check`로 스키마와 관계를 검사합니다.
-5. Pull Request를 생성합니다.
+5. 프로젝트를 추가했다면 `npm run cms:config`로 `.pages.yml`을 갱신하여 함께 제출합니다. 기존 프로젝트의 본문 수정에는 설정 재생성이 필요하지 않습니다.
+
+관리자는 최초 1회 app.pagescms.org에서 GitHub 로그인 후 Pages CMS GitHub App을 open-sdv 저장소에만 설치합니다. 외부 서비스 접근 승인은 관리자가 직접 수행합니다. main 브랜치에 저장하면 자동 검사·빌드 성공 후 공개 사이트에 반영됩니다. 별도 승인 흐름은 자동으로 생기지 않으며, 검토가 필요하면 별도 브랜치와 PR을 사용해야 합니다. 자체 OAuth 서버·비밀키·로컬 CMS 서버는 사용하지 않습니다.
 
 `BASE_PATH` 환경 변수를 지정하면 GitHub Pages의 저장소 하위 경로에서도 사용할 수 있습니다.
 

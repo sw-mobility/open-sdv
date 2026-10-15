@@ -77,6 +77,8 @@ p { margin-top: 0; }
 .section-heading { margin-bottom: 24px; }
 .section-heading h2 { margin: 0 0 7px; font-size: 27px; }
 .section-heading p { margin: 0; color: var(--muted); }
+.catalog-editor-link { display: inline-flex; align-items: center; min-height: 44px; margin-top: 7px; font-size: 13px; font-weight: 700; text-decoration: none; }
+.catalog-editor-link:hover { text-decoration: underline; }
 .filter-panel { display: grid; grid-template-columns: minmax(220px, 1fr) 150px 180px 170px; gap: 0; margin-bottom: 18px; background: #fff; border: 1px solid var(--line-strong); }
 .control { position: relative; padding: 14px 17px 16px; border-left: 1px solid var(--line); }
 .control:first-child { border-left: 0; }

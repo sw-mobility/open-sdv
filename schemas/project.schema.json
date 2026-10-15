@@ -5,6 +5,7 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
+    "body",
     "schema_version",
     "slug",
     "name",
@@ -19,6 +20,7 @@
     "last_reviewed"
   ],
   "properties": {
+    "body": { "type": "string" },
     "schema_version": { "const": "1.0" },
     "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
     "name": { "type": "string", "minLength": 2, "maxLength": 80 },

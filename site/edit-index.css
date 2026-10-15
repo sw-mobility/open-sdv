@@ -1,0 +1,23 @@
+.editor-index { padding-block: 36px 72px; display: grid; gap: 20px; }
+.edit-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+.edit-hint { color: var(--blue-700); font-size: 14px; margin-top: 22px; }
+.edit-steps { margin: 20px 0; padding-left: 24px; }
+.edit-steps li { padding: 8px 0 14px 8px; }
+.editor-choice .edit-steps li { display: list-item; border-top: 0; }
+.page-hero .breadcrumbs a { color: #d1e4f8; }
+.edit-steps p { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+.edit-notice { padding: 16px 18px; background: var(--blue-50); border-left: 3px solid var(--blue-600); font-size: 14px; line-height: 1.7; }
+.editor-choice { padding: 26px; background: #fff; border: 1px solid var(--line); }
+.editor-choice-heading { display: flex; align-items: center; gap: 24px; margin-bottom: 18px; }
+.editor-choice-heading h2 { margin: 0; font-size: 22px; }
+.editor-choice ul { padding: 0; margin: 0; list-style: none; }
+.editor-choice li { display: flex; justify-content: space-between; gap: 20px; align-items: center; padding: 18px 0; border-top: 1px solid var(--line); }
+.editor-choice li > div { max-width: 780px; }
+.editor-choice li strong, .editor-choice li span { display: block; }
+.editor-choice li span { margin-top: 4px; font-size: 13px; color: var(--muted); }
+.editor-choice li a { flex-shrink: 0; }
+@media (max-width: 760px) {
+  .editor-choice { padding: 20px; }
+  .editor-choice-heading { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .editor-choice li { align-items: flex-start; flex-direction: column; gap: 12px; }
+}

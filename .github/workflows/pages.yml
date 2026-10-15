@@ -24,6 +24,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run check
+      - run: npm run test:cms
       - name: Build static catalog
         run: npm run build
         env:
