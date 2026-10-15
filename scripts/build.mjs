@@ -9,7 +9,7 @@ import sanitizeHtml from 'sanitize-html';
 import { parse as parseYaml } from 'yaml';
 import { renderEditorIndex } from './edit-index.mjs';
 import { renderProject as projectView } from '../site/project-view.js';
-import { createPagesConfig, pagesConfigShape, pagesRepositoryUrl, pagesProjectUrl } from './pages-config.mjs';
+import { createPagesConfig, pagesConfigShape, pagesProjectUrl } from './pages-config.mjs';
 import { isDeepStrictEqual } from 'node:util';
 import { stringify as stringifyYaml } from 'yaml';
 import { createProjectValidator, normalizeProjectSource } from './project-data.mjs';
@@ -287,7 +287,7 @@ function renderProject(project) {
 
 function renderProjectEditorEntry(project) {
   const org = organizationMap.get(project.organization);
-  return layout({ title: `${project.name} 정보 수정`, current: 'contribute', body: `<link rel="stylesheet" href="${url('/edit-index.css')}"><section class="page-hero"><div class="shell"><div class="breadcrumbs"><a href="${url('/edit/')}">← 수정할 프로젝트 선택</a></div><p class="eyebrow">${escapeHtml(org.name)}</p><h1>${escapeHtml(project.name)} 정보 수정</h1><p class="lead">소개와 사용법을 Pages CMS의 폼에서 편집합니다. Git 명령어나 파일 수정은 필요하지 않습니다.</p><div class="edit-actions"><a class="button" href="${pagesProjectUrl(project.slug)}" target="_blank" rel="noopener noreferrer">Pages CMS에서 수정 ↗</a><a class="button secondary" href="${url(`/projects/${project.slug}/`)}">현재 프로젝트 페이지 보기</a></div></div></section><div class="shell editor-index"><section class="editor-choice"><h2>수정은 이렇게 진행됩니다</h2><ol class="edit-steps"><li><strong>GitHub 계정으로 로그인</strong><p>처음 사용할 때 저장소 접근 승인이 필요할 수 있습니다. 저장소가 보이지 않으면 사이트 관리자에게 문의하세요.</p></li><li><strong>프로젝트 정보를 폼에서 수정</strong><p>이름·한 줄 소개·소개와 사용법·문서 주소·담당자를 작성하세요. 수정 대상은 ${escapeHtml(project.name)}입니다.</p></li><li><strong>내용 확인 후 저장</strong><p>main 브랜치에서 저장하면 GitHub에 변경 내용이 기록됩니다. 자동 검사와 배포가 성공한 뒤 공개 사이트에 반영됩니다.</p></li></ol><p class="edit-notice">저장은 브라우저 임시저장이 아닙니다. 공개 가능한 정보만 작성하세요. 처음 연결할 때는 관리자가 편집 설정을 저장소에 반영하고 서비스 접근을 승인해야 합니다.</p><p><a href="${pagesRepositoryUrl}" target="_blank" rel="noopener noreferrer">프로젝트 폼이 열리지 않으면 저장소부터 선택하기 ↗</a></p></section></div>` });
+  return layout({ title: `${project.name} 정보 수정`, current: 'contribute', body: `<link rel="stylesheet" href="${url('/edit-index.css')}"><section class="page-hero"><div class="shell"><div class="breadcrumbs"><a href="${url('/edit/')}">← 프로젝트 선택</a></div><p class="eyebrow">${escapeHtml(org.name)}</p><h1>${escapeHtml(project.name)} 정보 수정</h1><p class="lead">Pages CMS에서 내용을 수정하고 Save를 눌러주세요.</p><div class="edit-actions"><a class="button" href="${pagesProjectUrl(project.slug)}" target="_blank" rel="noopener noreferrer">Pages CMS에서 수정 ↗</a><a class="button secondary" href="${url(`/projects/${project.slug}/`)}">프로젝트 페이지 보기</a></div></div></section><div class="shell editor-index"><section class="editor-choice"><h2>수정 방법</h2><ol class="edit-steps"><li><strong>GitHub 계정으로 로그인합니다.</strong></li><li><strong>프로젝트 정보를 수정합니다.</strong></li><li><strong>Save를 누릅니다.</strong><p>저장 후 사이트에 반영되기까지 잠시 걸릴 수 있습니다.</p></li></ol><p>편집 화면이 열리지 않으면 관리자에게 문의하세요.</p></section></div>` });
 }
 function renderOrganizations() {
   const cards = organizations.map((org) => {
@@ -306,13 +306,12 @@ function renderOrganizations() {
 }
 
 function renderContribute() {
-  return layout({ title: '프로젝트 등록·수정', description: 'Pages CMS에서 프로젝트 정보를 편집합니다.', current: 'contribute', body: `
-    <section class="page-hero"><div class="shell"><p class="eyebrow">Project management</p><h1>프로젝트 등록·수정</h1><p class="lead">담당 프로젝트를 선택하고 Pages CMS에서 폼으로 수정하세요.</p></div></section>
+  return layout({ title: '프로젝트 등록·수정', description: '프로젝트를 선택하고 Pages CMS에서 수정하세요.', current: 'contribute', body: `
+    <section class="page-hero"><div class="shell"><p class="eyebrow">Project management</p><h1>프로젝트 등록·수정</h1><p class="lead">프로젝트를 선택하고, 내용을 수정한 뒤 Save를 눌러주세요.</p></div></section>
     <div class="shell guide-layout"><article class="guide-content">
-    <section><h2>기존 프로젝트 수정</h2><p><a class="button" href="${url('/edit/')}">내 프로젝트 선택 →</a></p><ol class="steps"><li><strong>정보 수정 버튼을 누릅니다.</strong><br>Pages CMS가 새 창에서 열립니다. GitHub 계정으로 로그인하세요.</li><li><strong>한국어 폼에서 내용을 작성합니다.</strong><br>소개와 사용법은 서식 편집기에서 작성하고, 공개 상태와 성숙도 등은 목록에서 선택합니다.</li><li><strong>저장 후 배포 결과를 확인합니다.</strong><br>main 브랜치에 저장하면 자동 검사와 빌드를 거쳐 사이트에 반영됩니다. 저장 성공과 사이트 배포 완료는 다르므로 잠시 후 공개 페이지를 확인하세요.</li></ol><p>관리자 승인이 필요한 경우에는 별도 검토 브랜치에서 저장하고 PR로 병합해야 합니다. Pages CMS를 연결했다고 자동 승인 절차가 생기지는 않습니다.</p></section>
-    <section><h2>처음 사용하는 담당자</h2><p>관리자가 Pages CMS의 GitHub App을 open-sdv 저장소에 연결한 뒤 이용할 수 있습니다. 저장소가 보이지 않거나 저장 권한 오류가 나면 관리자에게 문의하세요. 로그인과 저장은 외부 Pages CMS 서비스에서 처리하며 이 사이트는 토큰이나 비밀번호를 보관하지 않습니다.</p></section>
-    <section><h2>새 프로젝트 등록</h2><p>새 프로젝트는 관리자가 기관·저장소·식별자를 확인하여 항목을 추가합니다. 현재 등록된 ${projects.length}개 프로젝트는 담당자가 내용을 수정할 수 있습니다.</p></section>
-    <section><h2>정보 저장 방식</h2><p>프로젝트별 project.yaml 하나에 기본 정보와 상세 본문이 함께 저장됩니다. 담당자는 파일 구조를 알 필요 없이 폼만 작성하면 됩니다. 기관별 메뉴는 편의를 위한 구분이며 기관별 접근권한 제한은 아닙니다.</p></section></article></div>` });
+    <section><h2>프로젝트 정보 수정</h2><p><a class="button" href="${url('/edit/')}">프로젝트 선택 →</a></p><ol class="steps"><li>담당 프로젝트의 <strong>정보 수정</strong>을 누릅니다.</li><li>Pages CMS에서 GitHub 계정으로 로그인합니다.</li><li>내용을 수정하고 <strong>Save</strong>를 누릅니다.</li></ol><p>저장 후 사이트에 반영되기까지 잠시 걸릴 수 있습니다.</p></section>
+    <section><h2>새 프로젝트 등록</h2><p>새 프로젝트 등록이나 편집 권한이 필요하면 관리자에게 문의하세요.</p></section>
+    </article></div>` });
 }
 function licenseLabel(license) {
   return !license ? '라이선스 미등록' : license === 'NOASSERTION' ? '라이선스 확인 필요' : escapeHtml(license);

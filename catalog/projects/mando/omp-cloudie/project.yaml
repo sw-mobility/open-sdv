@@ -6,7 +6,6 @@ summary: 차량과 클라우드를 연결하는 데이터 레이크, MLOps 및 S
 repository: https://github.com/sw-mobility/OMP_Cloudie
 repository_status: public
 status: unknown
-maturity: unknown
 license: Apache-2.0
 categories:
   - 클라우드

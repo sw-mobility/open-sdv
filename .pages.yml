@@ -164,21 +164,6 @@ content:
                   label: 실험
                 - name: archived
                   label: 보관
-          - name: maturity
-            label: 프로젝트 성숙도
-            type: select
-            options:
-              values:
-                - name: unknown
-                  label: 미등록
-                - name: concept
-                  label: 개념
-                - name: sandbox
-                  label: 샌드박스
-                - name: incubation
-                  label: 인큐베이션
-                - name: production
-                  label: 운영 적용
           - name: last_reviewed
             label: 09 · 정보 확인일
             type: date

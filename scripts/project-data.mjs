@@ -21,6 +21,8 @@ export function createProjectValidator(schema) {
 // Pages CMS may omit cleared optional fields; normalize only empty values.
 export function normalizeProjectSource(source) {
   const data = { ...source };
+  // Ignore the retired field if an already-open CMS form submits an old value.
+  delete data.maturity;
   for (const key of ['body', 'summary', 'license']) if (data[key] == null) data[key] = '';
   for (const key of ['categories', 'sdv_layers', 'technologies', 'integrates_with', 'maintainers']) {
     if (data[key] == null || data[key] === '') data[key] = [];

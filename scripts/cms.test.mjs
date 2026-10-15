@@ -114,3 +114,24 @@ test('KETI can publish a nonempty introduction while its repository remains priv
   assert.equal(data.repository_status, 'private');
   assert.ok(data.body.includes('담당기관'));
 });
+
+test('retired maturity is absent from schema, CMS forms, and all detail pages', () => {
+  assert.equal('maturity' in schema.properties, false);
+  assert.equal(schema.required.includes('maturity'), false);
+  const config = createPagesConfig(projects, organizations);
+  for (const group of config.content) for (const file of group.items) assert.ok(!file.fields.some(field => field.name === 'maturity'));
+  for (const { sourcePath, ...data } of projects) {
+    const html = renderProject({ ...data, html: '' }, { organizationMap: new Map(organizations.map(org => [org.slug, org])), projects, url: value => value, escapeHtml: value => String(value), renderOrganizationLogo: () => '', layout: ({body}) => body });
+    assert.ok(!html.includes('Maturity'));
+    assert.ok(!html.includes('성숙도'));
+  }
+});
+
+test('a stale CMS form may submit maturity without breaking the build', () => {
+  const { sourcePath, ...base } = projects[0];
+  const saved = { ...base, maturity: 'incubation' };
+  const normalized = normalizeProjectSource(saved);
+  assert.equal('maturity' in normalized, false);
+  assert.equal(saved.maturity, 'incubation');
+  assert.deepEqual(validate(normalized), []);
+});

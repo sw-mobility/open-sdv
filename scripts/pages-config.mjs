@@ -23,7 +23,6 @@ export function projectFields() {
     string('integrates_with', '함께 사용하는 프로젝트', { list: true, description: '연동 관계가 있는 등록 프로젝트 이름을 정확히 입력하세요. 없으면 비워두세요.' }),
     { name: 'maintainers', label: '07 · 공개 담당자', type: 'object', list: { collapsible: { collapsed: false, summary: '{name} · {role}' } }, description: '공개 가능한 이름·팀명과 GitHub 계정을 입력하세요. 개인 전화번호 등은 입력하지 마세요.', fields: [string('name', '이름 또는 팀명', { required: true }), string('role', '역할', { required: true, description: '예: 프로젝트 담당, 개발, Maintainer' }), string('github', 'GitHub 계정명', { pattern: { regex: '^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$', message: 'URL이 아닌 GitHub 계정명만 입력하세요.' }, description: 'https://github.com/ 부분을 제외한 계정명입니다.' })] },
     select('status', '08 · 운영 상태', { unknown: '확인 예정', active: '개발 중', maintained: '유지 관리', experimental: '실험', archived: '보관' }),
-    select('maturity', '프로젝트 성숙도', { unknown: '미등록', concept: '개념', sandbox: '샌드박스', incubation: '인큐베이션', production: '운영 적용' }),
     { name: 'last_reviewed', label: '09 · 정보 확인일', type: 'date', required: true, options: { time: false, format: 'yyyy-MM-dd' }, description: '입력한 정보를 마지막으로 확인한 날짜입니다. 수정 시 오늘 날짜로 갱신하세요.' },
     { name: 'featured', label: '대표 프로젝트 표시', type: 'boolean', hidden: true, readonly: true },
     { name: 'demo', label: '예제 데이터 표시', type: 'boolean', hidden: true, readonly: true },

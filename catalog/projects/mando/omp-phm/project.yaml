@@ -6,7 +6,6 @@ summary: 만도가 담당하는 데이터 기반 기능 프로젝트입니다. �
 repository: https://github.com/sw-mobility/OMP_PHM
 repository_status: public
 status: unknown
-maturity: unknown
 license: Apache-2.0
 categories:
   - 데이터

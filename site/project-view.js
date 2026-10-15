@@ -57,7 +57,7 @@ export function renderProject(project, context) {
         <section class="tab-panel" id="panel-downloads" role="tabpanel" aria-labelledby="tab-downloads" data-tab-panel="downloads" hidden><h2>소스 코드와 문서</h2><p class="tab-intro">소스 코드와 배포 자료는 프로젝트가 관리하는 공식 채널에서 제공합니다.</p><div class="resource-list">${resourceRows}</div></section>
         <section class="tab-panel" id="panel-people" role="tabpanel" aria-labelledby="tab-people" data-tab-panel="people" hidden><h2>Who's involved</h2><p class="tab-intro">이 프로젝트를 등록하고 유지하는 기관과 담당자입니다.</p><div class="people-list">${maintainers}</div><h3>담당기관</h3><p><strong>${escapeHtml(org.name)}</strong><br>${escapeHtml(org.description)}</p></section>
         <section class="tab-panel" id="panel-resources" role="tabpanel" aria-labelledby="tab-resources" data-tab-panel="resources" hidden><h2>개발 자료</h2><p class="tab-intro">개발, 통합, 테스트를 시작하는 데 필요한 프로젝트 링크와 기술 정보입니다.</p><div class="resource-list">${resourceRows}</div><h3>사용 기술</h3><div class="tag-row">${technologyTags}</div><h3>SDV 적용 계층</h3><div class="tag-row">${project.sdv_layers.map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join('')}</div></section>
-        <section class="tab-panel" id="panel-governance" role="tabpanel" aria-labelledby="tab-governance" data-tab-panel="governance" hidden><h2>운영 정보</h2><p class="tab-intro">프로젝트의 담당기관과 라이선스, 정보 확인일을 안내합니다. 구체적인 운영 및 기여 정책은 공식 저장소를 확인하세요.</p><dl class="overview-facts"><div class="fact"><dt>Maturity</dt><dd>${maturityLabel(project.maturity)}</dd></div><div class="fact"><dt>License</dt><dd>${licenseLabel(project.license)}</dd></div><div class="fact"><dt>담당기관</dt><dd>${escapeHtml(org.name)}</dd></div><div class="fact"><dt>정보 확인일</dt><dd>${escapeHtml(project.last_reviewed)}</dd></div></dl><p>성숙도와 담당자 등 미등록 정보는 각 기관에서 보완할 예정입니다.</p></section>
+        <section class="tab-panel" id="panel-governance" role="tabpanel" aria-labelledby="tab-governance" data-tab-panel="governance" hidden><h2>운영 정보</h2><p class="tab-intro">프로젝트의 담당기관과 라이선스, 정보 확인일을 안내합니다. 구체적인 운영 및 기여 정책은 공식 저장소를 확인하세요.</p><dl class="overview-facts"><div class="fact"><dt>License</dt><dd>${licenseLabel(project.license)}</dd></div><div class="fact"><dt>담당기관</dt><dd>${escapeHtml(org.name)}</dd></div><div class="fact"><dt>정보 확인일</dt><dd>${escapeHtml(project.last_reviewed)}</dd></div></dl></section>
         <section class="tab-panel" id="panel-contact" role="tabpanel" aria-labelledby="tab-contact" data-tab-panel="contact" hidden><h2>문의 및 기여</h2><p class="tab-intro">프로젝트 문의와 개선 제안은 공식 저장소의 안내를 확인한 뒤 전달하세요.</p><div class="sidebar-links"><a href="${escapeHtml(project.repository)}/issues" target="_blank" rel="noopener noreferrer">GitHub Issues에서 문의·제안 ↗</a><a href="${escapeHtml(project.repository)}#readme" target="_blank" rel="noopener noreferrer">README에서 기여 방법 확인 ↗</a></div>${project.maintainers.length ? `<h3>프로젝트 담당자</h3><div class="people-list">${maintainers}</div>` : ''}</section>
       </div>
       <aside class="project-sidebar" aria-label="프로젝트 보조 정보">
@@ -69,10 +69,6 @@ export function renderProject(project, context) {
     </div></div>
     <script src="${url('/catalog.js')}" defer></script>`;
   return layout({ title: project.name, description: project.summary, current: 'projects', body });
-}
-
-function maturityLabel(maturity) {
-  return ({ unknown: '정보 미등록', concept: 'Concept', sandbox: 'Sandbox', incubation: 'Incubation', production: 'Production' })[maturity] || maturity;
 }
 
 function licenseLabel(license) {

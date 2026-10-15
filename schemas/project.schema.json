@@ -12,7 +12,6 @@
     "organization",
     "summary",
     "status",
-    "maturity",
     "license",
     "categories",
     "sdv_layers",
@@ -31,7 +30,6 @@
     "documentation": { "type": "string", "format": "uri" },
     "repository_status": { "enum": ["public", "private", "unconfirmed"] },
     "status": { "enum": ["unknown", "active", "maintained", "experimental", "archived"] },
-    "maturity": { "enum": ["unknown", "concept", "sandbox", "incubation", "production"] },
     "license": { "type": "string", "anyOf": [{ "maxLength": 0 }, { "minLength": 2 }] },
     "categories": {
       "type": "array",

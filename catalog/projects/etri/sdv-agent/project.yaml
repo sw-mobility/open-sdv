@@ -6,7 +6,6 @@ summary: 이미지 데이터를 업로드하고 AWS S3와 로컬 디렉터리를
 repository: https://github.com/sw-mobility/SDV_agent
 repository_status: public
 status: unknown
-maturity: unknown
 license: Apache-2.0
 categories:
   - 데이터

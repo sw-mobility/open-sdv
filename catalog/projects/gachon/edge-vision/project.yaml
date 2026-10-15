@@ -6,7 +6,6 @@ summary: 엣지 장치에서 실행하는 경량 비전 AI 모델과 자율주�
 repository: https://github.com/sw-mobility/Edge_Vision
 repository_status: public
 status: unknown
-maturity: unknown
 license: Apache-2.0
 categories:
   - AI / ML
