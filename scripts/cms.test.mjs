@@ -10,9 +10,9 @@ const projects = [];
 for (const org of await fs.readdir('catalog/projects')) for (const slug of await fs.readdir(`catalog/projects/${org}`)) {
   const source = await fs.readFile(`catalog/projects/${org}/${slug}/project.yaml`, 'utf8').catch(error => { if (error.code === 'ENOENT') return null; throw error; });
   if (source === null) continue;
-  const data = parse(source);
+  const data = normalizeProjectSource(parse(source));
   projects.push({ ...data, sourcePath: `catalog/projects/${org}/${slug}` });
-  test(`${slug}: canonical YAML body exists`, () => { assert.equal(typeof data.body, 'string'); if (slug === 'sdv-aifw') assert.equal(data.body.trim(), ''); });
+  test(`${slug}: CMS data loads through the production normalization path`, () => { assert.equal(typeof data.body, 'string'); });
 }
 const organizations = await Promise.all((await fs.readdir('catalog/organizations')).map(async file => parse(await fs.readFile(`catalog/organizations/${file}`, 'utf8'))));
 test('Pages CMS config covers every project and locks destructive operations', () => {
@@ -81,4 +81,36 @@ test('missing or malformed maintainers returns errors rather than crashing valid
   const { sourcePath, maintainers, ...data } = projects[0];
   assert.ok(validate(data).some(error => error.path === 'maintainers'));
   assert.ok(validate({ ...data, maintainers: [null] }).some(error => error.path === 'maintainers'));
+});
+
+test('CMS omission of empty maintainers and technologies does not block validation or rendering', () => {
+  const { sourcePath, maintainers, technologies, ...saved } = projects.find(project => project.slug === 'omp-cloudie');
+  const before = structuredClone(saved);
+  assert.ok(validate(saved).some(error => error.path === 'maintainers'));
+  const data = normalizeProjectSource(saved);
+  assert.deepEqual(validate(data), []);
+  assert.deepEqual(data.maintainers, []);
+  assert.deepEqual(data.technologies, []);
+  assert.deepEqual(saved, before, 'Normalization must not modify saved source data.');
+  const html = renderProject({ ...data, html: '<p>CMS 본문</p>' }, { organizationMap: new Map(organizations.map(org => [org.slug, org])), projects, url: value => value, escapeHtml: value => String(value), renderOrganizationLogo: () => '', layout: ({body}) => body });
+  assert.ok(html.includes('CMS 본문'));
+});
+
+test('all empty optional fields accept omitted, null, and empty-string CMS representations', () => {
+  const { sourcePath, ...base } = projects[0];
+  for (const empty of [undefined, null, '']) {
+    const saved = { ...base };
+    for (const key of ['summary', 'body', 'license', 'categories', 'sdv_layers', 'technologies', 'integrates_with', 'maintainers', 'homepage', 'documentation']) {
+      if (empty === undefined) delete saved[key]; else saved[key] = empty;
+    }
+    assert.deepEqual(validate(normalizeProjectSource(saved)), []);
+  }
+});
+
+test('KETI can publish a nonempty introduction while its repository remains private', () => {
+  const { sourcePath, ...base } = projects.find(project => project.slug === 'sdv-aifw');
+  const data = normalizeProjectSource({ ...base, body: '# 프로젝트 소개\n\n담당기관에서 작성한 소개입니다.\n' });
+  assert.deepEqual(validate(data), []);
+  assert.equal(data.repository_status, 'private');
+  assert.ok(data.body.includes('담당기관'));
 });
