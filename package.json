@@ -7,6 +7,7 @@
     "build": "node scripts/build.mjs",
     "check": "node scripts/build.mjs --check",
     "test:cms": "node --test scripts/cms.test.mjs",
+    "test:site": "node --test scripts/site.test.mjs",
     "cms:config": "node scripts/build.mjs --cms-config",
     "serve": "npx serve dist -l 4173"
   },

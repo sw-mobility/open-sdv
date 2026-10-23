@@ -42,16 +42,11 @@ p { margin-top: 0; }
 .skip-link:focus { transform: none; }
 :focus-visible { outline: 3px solid #70b6ff; outline-offset: 3px; }
 
-.notice-bar { background: var(--blue-950); color: #e8f3ff; font-size: 13px; }
-.notice-inner { min-height: 34px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-.notice-bar a { color: #fff; font-weight: 700; text-decoration: none; }
-.notice-inner > a { flex-shrink: 0; white-space: nowrap; }
 .site-header { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.96); border-bottom: 1px solid var(--line); backdrop-filter: blur(12px); }
 .nav { width: min(1180px, calc(100% - 48px)); min-height: 76px; margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
 .brand { display: inline-flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none; }
-.brand-mark { flex-shrink: 0; width: 45px; height: 45px; display: grid; place-items: center; color: #fff; background: var(--blue-700); font-size: 16px; font-weight: 800; letter-spacing: -.04em; }
 .brand-copy { display: grid; line-height: 1.12; }
-.brand-copy strong { color: var(--blue-900); font-size: 25px; font-weight: 800; letter-spacing: -.04em; }
+.brand-copy strong { color: var(--blue-900); font-size: 28px; font-weight: 800; letter-spacing: -.04em; white-space: nowrap; }
 .brand-copy strong span { color: var(--blue-700); }
 .brand-copy small { margin-top: 4px; color: var(--muted); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
 .nav-links { display: flex; align-items: stretch; align-self: stretch; gap: 30px; }
@@ -66,7 +61,6 @@ p { margin-top: 0; }
 .catalog-hero .eyebrow { color: #a9d4ff; }
 .catalog-hero h1 { max-width: 760px; margin: 0 0 18px; font-size: clamp(37px, 5vw, 58px); }
 .catalog-hero .lead { max-width: 700px; margin: 0; color: #d7e8f8; font-size: 18px; }
-.demo-note { display: inline-block; margin: 22px 0 0; padding: 7px 10px; color: #d9ecff; border: 1px solid rgba(255,255,255,.3); font-size: 12px; }
 .metrics { display: grid; grid-template-columns: repeat(2, 1fr); border: 1px solid rgba(255,255,255,.26); background: rgba(255,255,255,.06); }
 .metric { min-height: 130px; display: grid; align-content: center; justify-items: center; border-left: 1px solid rgba(255,255,255,.22); }
 .metric:first-child { border-left: 0; }
@@ -77,8 +71,6 @@ p { margin-top: 0; }
 .section-heading { margin-bottom: 24px; }
 .section-heading h2 { margin: 0 0 7px; font-size: 27px; }
 .section-heading p { margin: 0; color: var(--muted); }
-.catalog-editor-link { display: inline-flex; align-items: center; min-height: 44px; margin-top: 7px; font-size: 13px; font-weight: 700; text-decoration: none; }
-.catalog-editor-link:hover { text-decoration: underline; }
 .filter-panel { display: grid; grid-template-columns: minmax(220px, 1fr) 150px 180px 170px; gap: 0; margin-bottom: 18px; background: #fff; border: 1px solid var(--line-strong); }
 .control { position: relative; padding: 14px 17px 16px; border-left: 1px solid var(--line); }
 .control:first-child { border-left: 0; }
@@ -202,7 +194,7 @@ p { margin-top: 0; }
 .site-footer { color: #d4e0eb; background: var(--blue-950); }
 .footer-inner { min-height: 112px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .footer-inner p { margin: 0; font-size: 13px; }
-.footer-inner a { color: #fff; }
+.footer-inner .footer-brand { color: #fff; font-size: 18px; font-weight: 800; letter-spacing: -.03em; }
 
 @media (max-width: 960px) {
   .catalog-hero-inner { grid-template-columns: 1fr; gap: 34px; }
@@ -219,11 +211,7 @@ p { margin-top: 0; }
 
 @media (max-width: 680px) {
   .shell, .nav { width: min(100% - 32px, 1180px); }
-  .notice-inner { min-height: 38px; }
-  .notice-inner > a { font-size: 12px; }
-  .notice-inner span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
   .nav { min-height: 0; padding-top: 12px; flex-direction: column; align-items: stretch; gap: 4px; }
-  .brand-mark { width: 39px; height: 39px; }
   .brand-copy strong { font-size: 23px; }
   .brand-copy small { display: none; }
   .nav-links { align-self: auto; justify-content: space-between; gap: 14px; }
@@ -255,7 +243,7 @@ p { margin-top: 0; }
   .guide-layout { grid-template-columns: 1fr; }
   .guide-nav { position: static; }
   .guide-content { padding: 25px 21px; }
-  .footer-inner { align-items: flex-start; flex-direction: column; justify-content: center; }
+  .footer-inner { padding-block: 24px; align-items: flex-start; flex-direction: column; justify-content: center; gap: 8px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

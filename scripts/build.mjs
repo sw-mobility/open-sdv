@@ -183,26 +183,23 @@ function escapeHtml(value = '') {
 }
 
 function layout({ title, description, current, body }) {
-  const fullTitle = title === '프로젝트' ? 'Open SDV Project DB' : `${title} · Open SDV Project DB`;
+  const fullTitle = title === '프로젝트' ? 'Open MiCOSA' : `${title} · Open MiCOSA`;
   return `<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="${escapeHtml(description)}">
+  <meta name="description" content="${escapeHtml(description || 'Open MiCOSA · 여러 기관의 SDV 공개 소프트웨어를 연결하는 공동 프로젝트 카탈로그입니다.')}">
   <meta name="theme-color" content="#07345f">
   <title>${escapeHtml(fullTitle)}</title>
-  <link rel="icon" type="image/svg+xml" href="${url('/favicon.svg')}?v=2">
+  <link rel="icon" type="image/svg+xml" href="${url('/favicon.svg')}?v=3">
   <link rel="stylesheet" href="${url('/styles.css')}">
 </head>
 <body>
   <a class="skip-link" href="#main">본문으로 건너뛰기</a>
-  <div class="notice-bar">
-    <div class="shell notice-inner"><span>Software-defined vehicle open source collaboration</span><a href="${url('/contribute/')}">프로젝트 등록 안내 →</a></div>
-  </div>
   <header class="site-header">
     <nav class="nav" aria-label="주요 메뉴">
-      <a class="brand" href="${url('/')}" aria-label="Open SDV 프로젝트 목록"><span class="brand-mark" aria-hidden="true">SDV</span><span class="brand-copy"><strong>Open <span>SDV</span></strong><small>Project Catalog</small></span></a>
+      <a class="brand" href="${url('/')}" aria-label="Open MiCOSA 프로젝트 목록"><span class="brand-copy"><strong>Open <span>MiCOSA</span></strong><small>SDV Open Source Projects</small></span></a>
       <div class="nav-links">
         <a href="${url('/')}" ${current === 'projects' ? 'aria-current="page"' : ''}>프로젝트</a>
         <a href="${url('/organizations/')}" ${current === 'organizations' ? 'aria-current="page"' : ''}>참여 기관</a>
@@ -213,8 +210,8 @@ function layout({ title, description, current, body }) {
   <main id="main">${body}</main>
   <footer class="site-footer">
     <div class="shell footer-inner">
-      <p>Open SDV Project DB · 여러 기관이 함께 관리하는 공개 소프트웨어 레지스트리</p>
-      <p><a href="${url('/contribute/')}">프로젝트 정보 수정 안내</a></p>
+      <p class="footer-brand">Open MiCOSA</p>
+      <p>함께 만드는 SDV 오픈소스 생태계</p>
     </div>
   </footer>
 </body>
@@ -229,7 +226,7 @@ function renderCatalog() {
     <section class="catalog-hero" aria-labelledby="catalog-title">
       <div class="shell catalog-hero-inner">
         <div>
-          <p class="eyebrow">Open software · shared mobility</p>
+          <p class="eyebrow">SDV Open Source Catalog</p>
           <h1 id="catalog-title">SDV 오픈소스를<br>한곳에서 탐색하세요.</h1>
           <p class="lead">여러 기관이 공개한 차량 소프트웨어의 역할과 소스 코드, 개발 문서, 참여 방법을 살펴보세요.</p>
         </div>
@@ -240,7 +237,7 @@ function renderCatalog() {
       </div>
     </section>
     <section class="shell catalog-body" aria-labelledby="project-list-title">
-      <div class="section-heading"><h2>프로젝트 찾기</h2><p>기관과 기술 분야를 선택하거나 프로젝트 이름으로 검색하세요.</p><a class="catalog-editor-link" href="${url('/edit/')}">기관 담당자 · 프로젝트 정보 수정 →</a></div>
+      <div class="section-heading"><h2>프로젝트 찾기</h2><p>기관과 기술 분야를 선택하거나 프로젝트 이름으로 검색하세요.</p></div>
       <div class="filter-panel" role="search">
         <div class="control">
           <label for="project-search">프로젝트 검색</label><span class="search-icon" aria-hidden="true"></span>

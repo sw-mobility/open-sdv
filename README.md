@@ -1,10 +1,10 @@
-# Open SDV Project DB
+# Open MiCOSA
 
 여러 기관의 SDV(Software-Defined Vehicle) 관련 소프트웨어를 한곳에서 탐색하고, 각 기관이 프로젝트 소개와 사용법을 직접 관리하는 공동 프로젝트 카탈로그입니다.
 
 프로젝트 소스 코드는 각 저장소에서 관리하며, 이 저장소에서는 프로젝트 정보와 공개 웹사이트를 관리합니다.
 
-- **공개 사이트:** [Open SDV Project DB](https://sw-mobility.github.io/open-sdv/)
+- **공개 사이트:** [Open MiCOSA](https://sw-mobility.github.io/open-sdv/)
 - **정보 수정 안내:** [등록·수정 페이지](https://sw-mobility.github.io/open-sdv/contribute/)
 - **웹 편집 도구:** [Pages CMS](https://app.pagescms.org/sw-mobility/open-sdv/main)
 
@@ -116,6 +116,7 @@ npm ci
 npm run check
 npm run test:cms
 npm run build
+npm run test:site
 npm run serve
 ```
 
@@ -149,7 +150,8 @@ npm run build
 2. `npm run check`로 카탈로그 검사
 3. `npm run test:cms`로 CMS 데이터 처리·화면 렌더링 테스트
 4. 저장소 하위 경로를 적용하여 `npm run build`
-5. `dist/` 결과물을 GitHub Pages에 배포
+5. `npm run test:site`로 생성된 페이지의 브랜드와 공통 메뉴 검사
+6. `dist/` 결과물을 GitHub Pages에 배포
 
 GitHub 저장소의 Pages 배포 소스는 **GitHub Actions**를 사용합니다. 방문자 조회를 위해 별도 Node.js 서버를 띄울 필요는 없습니다.
 
