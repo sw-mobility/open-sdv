@@ -2,6 +2,7 @@ schema_version: "1.0"
 slug: kookmin
 name: 국민대학교
 short_name: 국민대
-description: SDV 기반 자동차 소프트웨어 플랫폼 기술 개발 과제의 공동연구개발기관입니다.
+description: 이 과제에는 국민대학교 산학협력단이 참여합니다.
 country: KR
 logo: kookmin.png
+logo_source: https://www.kookmin.ac.kr/content/05sub/style0005/images/common/kmu_logo.png

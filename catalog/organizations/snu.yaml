@@ -2,6 +2,7 @@ schema_version: "1.0"
 slug: snu
 name: 서울대학교
 short_name: 서울대
-description: SDV 기반 자동차 소프트웨어 플랫폼 기술 개발 과제의 공동연구개발기관입니다.
+description: 이 과제에는 서울대학교 산학협력단이 참여합니다.
 country: KR
 logo: snu.png
+logo_source: https://commons.wikimedia.org/wiki/File:Seoul_national_university_logotype.svg
