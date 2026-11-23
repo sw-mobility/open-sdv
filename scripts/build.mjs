@@ -288,7 +288,12 @@ function renderProjectEditorEntry(project) {
   return layout({ title: `${project.name} 정보 수정`, current: 'contribute', body: `<link rel="stylesheet" href="${url('/edit-index.css')}"><section class="page-hero"><div class="shell"><div class="breadcrumbs"><a href="${url('/edit/')}">← 프로젝트 선택</a></div><p class="eyebrow">${escapeHtml(org.name)}</p><h1>${escapeHtml(project.name)} 정보 수정</h1><p class="lead">Pages CMS에서 내용을 수정하고 Save를 눌러주세요.</p><div class="edit-actions"><a class="button" href="${pagesProjectUrl(project.slug)}" target="_blank" rel="noopener noreferrer">Pages CMS에서 수정 ↗</a><a class="button secondary" href="${url(`/projects/${project.slug}/`)}">프로젝트 페이지 보기</a></div></div></section><div class="shell editor-index"><section class="editor-choice"><h2>수정 방법</h2><ol class="edit-steps"><li><strong>GitHub 계정으로 로그인합니다.</strong></li><li><strong>프로젝트 정보를 수정합니다.</strong></li><li><strong>Save를 누릅니다.</strong><p>저장 후 사이트에 반영되기까지 잠시 걸릴 수 있습니다.</p></li></ol><p>편집 화면이 열리지 않으면 관리자에게 문의하세요.</p></section></div>` });
 }
 function renderOrganizations() {
-  const cards = organizations.map((org) => {
+  const researchInstitutes = new Set(['keti', 'etri']);
+  const orderedOrganizations = [
+    ...organizations.filter((org) => researchInstitutes.has(org.slug)),
+    ...organizations.filter((org) => !researchInstitutes.has(org.slug)),
+  ];
+  const cards = orderedOrganizations.map((org) => {
     const count = projects.filter((project) => project.organization === org.slug).length;
     const institutionProjects = projects.filter((project) => project.organization === org.slug);
     return `<article class="org-card">
