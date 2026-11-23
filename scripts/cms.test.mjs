@@ -51,7 +51,7 @@ test('changing a project title through CMS does not require a config regeneratio
 
 test('cleared optional Pages CMS fields remain buildable without exposing private content', () => {
   const { sourcePath, ...base } = projects.find(project => project.slug === 'sdv-aifw');
-  const data = normalizeProjectSource({ ...base, summary: null, license: '', body: null, categories: null, sdv_layers: [], maintainers: null, documentation: '', homepage: '' });
+  const data = normalizeProjectSource({ ...base, repository_status: 'private', summary: null, license: '', body: null, categories: null, sdv_layers: [], maintainers: null, documentation: '', homepage: '' });
   assert.equal(data.body, ''); assert.equal(data.repository_status, 'private');
   assert.equal('documentation' in data, false); assert.equal('homepage' in data, false);
   assert.deepEqual(validate(data), []);
@@ -108,9 +108,9 @@ test('all empty optional fields accept omitted, null, and empty-string CMS repre
   }
 });
 
-test('KETI can publish a nonempty introduction while its repository remains private', () => {
+test('a private project can publish a nonempty introduction', () => {
   const { sourcePath, ...base } = projects.find(project => project.slug === 'sdv-aifw');
-  const data = normalizeProjectSource({ ...base, body: '# 프로젝트 소개\n\n담당기관에서 작성한 소개입니다.\n' });
+  const data = normalizeProjectSource({ ...base, repository_status: 'private', body: '# 프로젝트 소개\n\n담당기관에서 작성한 소개입니다.\n' });
   assert.deepEqual(validate(data), []);
   assert.equal(data.repository_status, 'private');
   assert.ok(data.body.includes('담당기관'));

@@ -15,12 +15,12 @@
 | HL만도 | OMP_Cloudie | [OMP_Cloudie](https://github.com/sw-mobility/OMP_Cloudie) |
 | HL만도 | OMP_Xrite | [OMP_Xrite](https://github.com/sw-mobility/OMP_Xrite) |
 | HL만도 | OMP_PHM | [OMP_PHM](https://github.com/sw-mobility/OMP_PHM) |
-| KETI | SDV_AIFW | [SDV_AIFW](https://github.com/sw-mobility/SDV_AIFW) · 비공개, 접근 권한 필요 |
+| KETI | SDV_AIFW | [SDV_AIFW](https://github.com/sw-mobility/SDV_AIFW) |
 | ETRI | TANGO-SDV | [TANGO-SDV](https://github.com/sw-mobility/TANGO-SDV) |
 | ETRI | SDV_agent | [SDV_agent](https://github.com/sw-mobility/SDV_agent) |
 | 가천대학교 | Edge_Vision | [Edge_Vision](https://github.com/sw-mobility/Edge_Vision) |
 
-비공개 저장소의 링크를 등록하더라도 소스 코드가 공개되거나 접근 권한이 부여되는 것은 아닙니다. 카탈로그에 입력하는 소개와 담당자 정보는 공개됩니다.
+서울대학교 산학협력단, 국민대학교 산학협력단, ㈜페르세우스는 [참여 기관](https://sw-mobility.github.io/open-sdv/organizations/)에 표시됩니다. 카탈로그에 입력하는 소개와 담당자 정보는 공개됩니다.
 
 ## 사용 기술과 선택 이유
 

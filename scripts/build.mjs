@@ -296,7 +296,7 @@ function renderOrganizations() {
       <h2>${escapeHtml(org.name)}</h2>
       <p>${escapeHtml(org.description)}</p>
       ${count ? `<ul class="institution-projects">${institutionProjects.map((project) => `<li><a href="${url(`/projects/${project.slug}/`)}">${escapeHtml(project.name)} <span aria-hidden="true">→</span></a></li>`).join('')}</ul>` : ''}
-      <div class="org-meta"><span>${count ? `${count}개 등록 프로젝트` : '공개 프로젝트 준비 중'}</span>${count ? `<a href="${url('/')}?organization=${org.slug}">프로젝트 모아보기 →</a>` : ''}</div>
+      <div class="org-meta"><span>${count ? `${count}개 등록 프로젝트` : '등록된 프로젝트 없음'}</span>${count ? `<a href="${url('/')}?organization=${org.slug}">프로젝트 모아보기 →</a>` : ''}</div>
     </article>`;
   }).join('');
   const body = `<section class="page-hero"><div class="shell"><p class="eyebrow">Organizations</p><h1>참여 기관</h1><p class="lead">각 기관이 담당하는 SDV 프로젝트와 공개 저장소를 살펴보세요.</p></div></section><div class="shell org-grid">${cards}</div>`;

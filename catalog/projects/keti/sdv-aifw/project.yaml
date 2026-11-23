@@ -2,8 +2,31 @@ schema_version: "1.0"
 slug: sdv-aifw
 name: SDV_AIFW
 organization: keti
-summary: AIFW for On-Device. Upload your dataset, upload your model, train your model.
+summary: 차량과 엣지 환경에서 데이터셋과 AI 모델을 관리하고, 모델 학습·검증·최적화를 지원하는 SDV용 AI 프레임워크입니다.
 repository: https://github.com/sw-mobility/SDV_AIFW
-repository_status: private
-last_reviewed: 2026-10-12
+repository_status: public
+documentation: https://github.com/sw-mobility/SDV_AIFW#readme
+categories:
+  - AI / ML
+  - MLOps
+sdv_layers:
+  - vehicle
+  - edge
+technologies:
+  - Python
+  - Kubernetes
+last_reviewed: "2026-11-23"
 featured: false
+body: |
+  ## 프로젝트 소개
+
+  한국전자기술연구원(KETI)이 개발하는 SDV용 AI 프레임워크입니다. 데이터셋과 모델을 등록하고, 차량·엣지 환경에 적용할 모델의 학습, 검증, 최적화를 지원합니다.
+
+  ## 주요 구성
+
+  - 웹 화면과 API를 통한 프로젝트·데이터셋 관리
+  - 모델 학습, 검증, 최적화 및 연속학습 모듈
+
+  ## 개발 문서
+
+  [GitHub README](https://github.com/sw-mobility/SDV_AIFW#readme)에서 API 구조와 모듈별 설명을 확인할 수 있습니다.
