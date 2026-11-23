@@ -20,7 +20,7 @@
 | ETRI | SDV_agent | [SDV_agent](https://github.com/sw-mobility/SDV_agent) |
 | 가천대학교 | Edge_Vision | [Edge_Vision](https://github.com/sw-mobility/Edge_Vision) |
 
-서울대학교 산학협력단, 국민대학교 산학협력단, ㈜페르세우스는 [참여 기관](https://sw-mobility.github.io/open-sdv/organizations/)에 표시됩니다. 카탈로그에 입력하는 소개와 담당자 정보는 공개됩니다.
+서울대학교와 국민대학교는 [참여 기관](https://sw-mobility.github.io/open-sdv/organizations/)에 표시됩니다. 카탈로그에 입력하는 소개와 담당자 정보는 공개됩니다.
 
 ## 사용 기술과 선택 이유
 
